@@ -164,7 +164,7 @@ the number and the unit of measure.</p>
 <p>The <i>viewBox</i> attribute sets up the <span class="word" data-term="coordinate system" data-definition="A way of assigning numerical coordinates to geometric points. In two
 dimensions, each point corresponds to a pair of numbers. In three dimensions, each point corresponds
 to a triple of numbers." title="Click for a definition of coordinate system.">coordinate system</span> that will be used for 
-drawing the image. It is what I called the <span class="word" data-term="view window" data-definition="As used in this book, the window, or view window, for 2D graphics
+drawing the image. It is what we called the <span class="word" data-term="view window" data-definition="As used in this book, the window, or view window, for 2D graphics
 is the rectangle in the xy-plane that contains the portion of the plane that will be displayed
 in the image. (The corresponding term in 3D graphics is &quot;view volume.&quot;)" title="Click for a definition of view window.">view window</span> in <a href="../c2/s3.html#graphics2d.3.1">Subsection&nbsp;2.3.1</a>.
 The value for viewBox is a list of four numbers,
@@ -253,9 +253,9 @@ browser's "view source" command.)</p>
 shape, and attributes give the properties of the shape. There are attributes to specify
 the geometry, such as the endpoints of a line or the radius of a circle.
 Other attributes specify style properties, such as fill color and line width.
-(The style properties are what I call <span class="word" data-term="attribute" data-definition="A property, such as color, of a graphical object. An image can be specified
+(The style properties are what we call <span class="word" data-term="attribute" data-definition="A property, such as color, of a graphical object. An image can be specified
 by the geometric shapes that it contains, together with their attributes." title="Click for a definition of attribute.">attributes</span> elsewhere
-in this book; in this section, I am using the term "attribute" in its XML sense.)
+in this book; in this section, we are using the term "attribute" in its XML sense.)
 And there is a <i>transform</i> attribute that can be used to apply a
 <span class="word" data-term="geometric transform" data-definition="A coordinate transformation; that is, a function that can
 be applied to each of the points in a geometric object to produce a new object. Common
@@ -307,7 +307,7 @@ programming language for web pages. The canvas element supports a 2D graphics AP
 In many browsers, it also supports the 3D graphics API, WebGL." title="Click for a definition of HTML canvas.">HTML canvas</span> API. For example,
 it can be a common color name such as "black" or "red", or an <span class="word" data-term="RGB color" data-definition="A color specified by three numbers giving the amount of red, green, and blue
 in the color." title="Click for a definition of RGB color.">RGB color</span>
-such as "rgb(255,200,180)". There are also gradient and pattern fills, though I will not
+such as "rgb(255,200,180)". There are also gradient and pattern fills, though we will not
 discuss them here.</li>
 
 <li>
@@ -501,7 +501,7 @@ by two control points C1 and C2. The tangent to the curve (its direction and spe
 given by the line from P1 to C1. The tangent vector to the curve at P2 is given by 
 the line from C2 to P2. A quadratic Bezier curve is defined by its two endpoints and
 a single control point C. The tangent at each endpoint is the line between that endpoint
-and&nbsp;C." title="Click for a definition of Bezier curve.">Bezier curves</span>, and elliptical arcs (although I won't
+and&nbsp;C." title="Click for a definition of Bezier curve.">Bezier curves</span>, and elliptical arcs (although we won't
 discuss elliptical arcs here). The syntax for
 specifying a path is very succinct, and it has some features that we have not seen before.
 A path element has an attribute named <i>d</i> that contains the data for the path. The
@@ -698,12 +698,12 @@ Here is the image:</p>
 <h3 class="subsection_title" id="graphics2d.7.5">2.7.5&nbsp;&nbsp;Animation</h3>
 
 
-<p>SVG has a number of advanced features that I won't discuss here, but I do want to
+<p>SVG has a number of advanced features that we won't discuss here, but we do want to
 mention one: <span class="word" data-term="animation" data-definition="A sequence of images that, when displayed quickly one after the other,
 will produce the impression of continuous motion or change. The term animation also refers
 to the process of creating such image sequences." title="Click for a definition of animation.">animation</span>. It is possible to animate almost any property
 of an SVG object, including geometry, style, and transforms. The syntax for animation
-is itself fairly complex, and I will only do a few examples. But I will tell you enough
+is itself fairly complex, and we will only do a few examples. But we will tell you enough
 to produce a fairly complex hierarchical animation like the "cart-and-windmills"
 example that was discussed and used as a demo in <a href="../c2/s4.html#graphics2d.4.1">Subsection&nbsp;2.4.1</a>.
 An SVG version of that animation can be found in <span class="sourceref"><a href="../source/svg/cart-and-windmills.svg">svg/cart-and-windmills.svg</a></span>.

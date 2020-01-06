@@ -146,9 +146,9 @@ method usually looks something like this:</p>
 }</pre>
 
 
-<p class="noindent">In the rest of this section, I will assume that <i>g2</i> is a variable of
-type <span class="classname">Graphics2D</span>, and I will discuss some of the things
-that you can do with it. As a first example, I note that <span class="classname">Graphics2D</span>
+<p class="noindent">In the rest of this section, we will assume that <i>g2</i> is a variable of
+type <span class="classname">Graphics2D</span>, and we will discuss some of the things
+that you can do with it. As a first example, note that <span class="classname">Graphics2D</span>
 supports <span class="word" data-term="antialiasing" data-definition="A technique used to reduce the jagged or &quot;staircase&quot; appearance
 of diagonal lines, text, and other shapes that are drawn using pixels. When a pixel is only partly
 covered by a geometric shape, then the color of the pixel is a blend of the color of the shape and
@@ -245,7 +245,7 @@ If <i>pd</i> is a variable of type <span class="classname">Point2D.Double</span>
 directly to the coordinates as <i>pd.x</i> and <i>pd.y</i>
 (and similarly for <span class="classname">Point2D.Float</span>).
 Other classes in <i>java.awt.geom</i> offer a similar variety of ways
-to manipulate their properties, and I won't try to list them all here.
+to manipulate their properties, and we won't try to list them all here.
 </p>
 
 
@@ -458,7 +458,7 @@ where two segments meet. (See <a href="../c2/s2.html#graphics2d.2.1">Subsection&
            BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL) );</pre>
            
 
-<p class="noindent">It is also possible to make strokes out of dashes and dots, but I won't discuss how
+<p class="noindent">It is also possible to make strokes out of dashes and dots, but we won't discuss how
 to do it here.</p>
 
 
@@ -514,7 +514,7 @@ used instead of HSV.)" title="Click for a definition of HSV color.">HSV</span>).
 In this case, the hue, saturation, and brightness color components must be given as values of
 type <span class="ptype">float</span>. And there are constants to represent about a dozen common
 colors, such as <i>Color.WHITE</i>, <i>Color.RED</i>, and <i>Color.YELLOW</i>.
-For example, here is how I might draw a square with a black outline and a light
+For example, here is how you might draw a square with a black outline and a light
 blue interior:</p>
 
 
@@ -712,12 +712,12 @@ function from <a href="../c2/s3.html#graphics2d.3.7">Subsection&nbsp;2.3.7</a>. 
 <hr class="break">
 
 
-<p>I will mention one more use for <span class="classname">AffineTransform</span> objects:  Sometimes,
+<p>We will mention one more use for <span class="classname">AffineTransform</span> objects:  Sometimes,
 you do need to explicitly transform coordinates. For example, given <span class="word" data-term="object coordinates" data-definition="The coordinate system in which the coordinates for points in an 
 object are originally specified, before they are transformed by any modeling or other transform that
 will be applied to the object." title="Click for a definition of object coordinates.">object coordinates</span>
-(<i>x</i>,<i>y</i>), I might need to know where they will actually end up on the screen, in 
-pixel coordinates. That is, I would like to transform (<i>x</i>,<i>y</i>) by the current transform
+(<i>x</i>,<i>y</i>), you might need to know where they will actually end up on the screen, in 
+pixel coordinates. That is, you would like to transform (<i>x</i>,<i>y</i>) by the current transform
 to get the corresponding pixel coordinates. The <span class="classname">AffineTransform</span> class
 has a method for applying the affine transform to a point. It works with objects of type
 <span class="classname">Point2D</span>. Here is an example:</p>
@@ -732,10 +732,10 @@ int pixelX = (int)transformedPoint.x;
 int pixelY = (int)transformedPoint.y;</pre>
 
 
-<p class="noindent">One way I have used this is when working with strings. Often when displaying a string in a
-transformed coordinate system, I want to transform the basepoint of a string, but not
-the string itself. That is, I want the transformation to affect the location of the string
-but not its size or rotation. To accomplish this, I use the above technique to obtain
+<p class="noindent">One way to use this is when working with strings. Often when displaying a string in a
+transformed coordinate system, you want to transform the basepoint of a string, but not
+the string itself. That is, you want the transformation to affect the location of the string
+but not its size or rotation. To accomplish this, you can use the above technique to obtain
 the pixel coordinates for the transformed basepoint, and then draw the string at
 those coordinates, using an original, untransformed graphics context.</p>
 
@@ -780,7 +780,7 @@ the transformation of coordinates.)</p>
 
 
 <p>In some graphics applications, it is useful to be able to work with images that
-are not visible on the screen. That is, you need what I call an <span class="newword" data-term="off-screen canvas" data-definition="My term for a segment of the computer's memory that can be
+are not visible on the screen. That is, you need what we call an <span class="newword" data-term="off-screen canvas" data-definition="My term for a segment of the computer's memory that can be
 used as a drawing surface, for drawing images that are not visible on the screen. Some method
 should exist for copying the image from an off-screen canvas onto the screen. In Java, for example, an
 off-screen canvas can be implemented as an object of type BufferedImage." title="Click for a definition of off-screen canvas.">off-screen canvas</span>.
