@@ -9,7 +9,7 @@
 
 function graphicsToolbox() {
   return `
-<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+  <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
   <category name="Graphics" colour="#ffff00">
     <block type="graphics_createpath"></block>
     <block type="graphics_moveto">
@@ -22,6 +22,22 @@ function graphicsToolbox() {
     </block>
     <block type="graphics_closepath"></block>
     <block type="graphics_stroke"></block>
+    <block type="graphics_translate">
+      <field name="X">0</field>
+      <field name="Y">0</field>
+    </block>
+    <block type="graphics_rotate">
+      <field name="ANGLE">0</field>
+    </block>
+    <block type="graphics_scale">
+      <field name="X">1</field>
+      <field name="Y">1</field>
+    </block>
+    <block type="graphics_movetoex"></block>
+    <block type="graphics_linetoex"></block>
+    <block type="graphics_translateex"></block>
+    <block type="graphics_rotateex"></block>
+    <block type="graphics_scaleex"></block>
   </category>
   <sep></sep>
   <category name="Logic" colour="#5b80a5">
