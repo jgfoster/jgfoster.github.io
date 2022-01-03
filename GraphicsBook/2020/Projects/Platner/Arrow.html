@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Final Project</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://cdn.babylonjs.com/ammo.js"></script>
+    </head>
+
+   <body>
+
+    <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+
+    <script>
+        var canvas = document.getElementById("renderCanvas"); // Get the canvas element
+        var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+        // Add an event listener to get the location of a click event
+        window.addEventListener("click", function () {var pickResult = scene.pick(scene.pointerX, scene.pointerY);});
+
+        /******* Add the create scene function ******/
+        var createScene = function () {
+
+            // Create the scene space
+            var scene = new BABYLON.Scene(engine);
+
+            // Add a camera to the scene and attach it to the canvas
+            var camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(-1,1,-24.5), scene);
+            camera.setTarget(new BABYLON.Vector3(0,0,5));
+
+            camera.attachControl(canvas, true);
+            camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
+
+            // Add lights to the scene
+            var light = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(-1, -2, 1), scene);
+	        light.position = new BABYLON.Vector3(20, 40, 20);
+	        light.intensity = 1;
+
+            // Add a skybox
+            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500.0}, scene);
+            var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+            skyboxMaterial.backFaceCulling = false;
+            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("skybox", scene);
+            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+            skybox.material = skyboxMaterial;
+
+            skybox.position.y += 100;
+
+            // Adding meshes
+            var ground = BABYLON.MeshBuilder.CreatePlane("ground", {height: 100, width: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+            
+            
+            ground.position.y = -1;
+            ground.rotation.x = Math.PI/2;
+
+            var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+
+            groundMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0);
+            groundMaterial.specularColor = new BABYLON.Color3(0, 1, 0);
+            groundMaterial.ambientColor = new BABYLON.Color3(0, 1, 0);
+
+            ground.material = groundMaterial;
+
+            //var guimanager = new BABYLON.GUI.GUI3DManager(scene);
+
+            // Adding physics
+            var physicsEngine = scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.AmmoJSPlugin());
+            camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+            scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+            camera.applyGravity = true;
+
+            scene.collisionsEnabled = true;
+            camera.checkCollisions = true;
+            ground.checkCollisions = true;
+            
+            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 0}, scene);
+            skybox.physicsImpostor = new BABYLON.PhysicsImpostor(skybox, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 0}, scene);
+
+            var arrow;
+            var bow;
+            var target;
+            var score = 0;
+
+            var looseArrow = function() {
+                BABYLON.SceneLoader.ImportMesh("", "./", "arrow.obj", scene, function (meshes) {
+                    arrow = meshes[0];
+                    bow = meshes[1];
+                    target = meshes[2];
+
+                    // Imported materials and textures
+                    var arrowMaterial = new BABYLON.StandardMaterial("arrowMaterial", scene);
+                    arrowMaterial.diffuseTexture = new BABYLON.Texture("arrowTexture.png", scene);
+                    arrowMaterial.specularTexture = new BABYLON.Texture("arrowTexture.png", scene);
+                    arrowMaterial.emissiveTexture = new BABYLON.Texture("arrowTexture.png", scene);
+                    arrowMaterial.ambientTexture = new BABYLON.Texture("arrowTexture.png", scene);
+                    arrowMaterial.backFaceCulling = false;
+                    arrow.material = arrowMaterial;
+
+                    var bowMaterial = new BABYLON.StandardMaterial("bowMaterial", scene);
+                    bowMaterial.diffuseTexture = new BABYLON.Texture("bowTexture.png", scene);
+                    bowMaterial.specularTexture = new BABYLON.Texture("bowTexture.png", scene);
+                    bowMaterial.emissiveTexture = new BABYLON.Texture("bowTexture.png", scene);
+                    bowMaterial.ambientTexture = new BABYLON.Texture("bowTexture.png", scene);
+                    bow.material = bowMaterial;
+
+                    var targetMaterial = new BABYLON.StandardMaterial("targetMaterial", scene);
+                    targetMaterial.diffuseTexture = new BABYLON.Texture("targetTexture.png", scene);
+                    targetMaterial.specularTexture = new BABYLON.Texture("targetTexture.png", scene);
+                    targetMaterial.emissiveTexture = new BABYLON.Texture("targetTexture.png", scene);
+                    targetMaterial.ambientTexture = new BABYLON.Texture("targetTexture.png", scene);
+                    target.material = targetMaterial;
+
+                    arrow.sideOrientation = BABYLON.Mesh.DOUBLESIDE;
+                    arrow.rotation = new BABYLON.Vector3(0, Math.PI, -Math.PI/2);
+                    arrow.position = new BABYLON.Vector3(0, 1, -20);
+                    arrow.scaling = new BABYLON.Vector3(.5,.5,.5);
+
+                    bow.scaling = new BABYLON.Vector3(.25,.25,.25);
+                    bow.rotation = new BABYLON.Vector3(0,Math.PI,0);
+                    bow.position = new BABYLON.Vector3(2,1,-20);
+
+                    target.position = new BABYLON.Vector3(5, 3, 25 );
+                    target.scaling = new BABYLON.Vector3(.5, .5, .5);
+
+                    target.physicsImpostor = new BABYLON.PhysicsImpostor(target, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 0}, scene);
+                    
+                    var boundries = [ground.physicsImpostor, target.physicsImpostor, skybox.physicsImpostor];
+
+                    var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+                    shadowGenerator.addShadowCaster(arrow);
+                    shadowGenerator.useExponentialShadowMap = true;
+                    target.receiveShadows = true;
+                    ground.receiveShadows = true;
+
+                    scene.onPointerDown = function (evt, pickResult) {
+                        if (pickResult.pickedPoint) {
+                            var aimedTarget = pickResult.pickedPoint;
+                            aimedTarget = aimedTarget.normalize();
+                            var music = new BABYLON.Sound("Music", "arrow.wav", scene, null, {autoplay: true});
+                            target.position = new BABYLON.Vector3(5, 3, 25 * (1 + score));
+                            arrow.rotation = new BABYLON.Vector3(0, Math.PI, -Math.PI / 2);
+                            arrow.position = new BABYLON.Vector3(0, 1, -20);
+                            arrow.physicsImpostor = new BABYLON.PhysicsImpostor(arrow, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 1}, scene);
+                            arrow.physicsImpostor.setLinearVelocity(aimedTarget.scale(100));
+                            arrow.physicsImpostor.setAngularVelocity(new BABYLON.Quaternion(.1, 0, 0, .01));
+                            var collision = function() {
+                                if(arrow.position.z - 19.8 - (25 * score) < 1 && arrow.position.z - 19.8 - (25 * score) > -1) {
+                                    score++;
+                                    console.log(score);
+                                    arrow.physicsImpostor.setMass(0);
+                                    return;
+                                } else {
+                                    score = 0;
+                                    console.log("You lose.");
+                                    arrow.physicsImpostor.setMass(0);
+                                    return;
+                                }
+                            }
+                            arrow.physicsImpostor.registerOnPhysicsCollide(boundries, collision);
+                            return;
+                        }
+                    };
+                });
+            }
+            looseArrow();
+            return scene;
+        };
+        /******* End of the create scene function ******/
+
+        var scene = createScene(); //Call the createScene function
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () {
+                scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () {
+                engine.resize();
+        });
+    </script>
+
+   </body>
+
+</html>

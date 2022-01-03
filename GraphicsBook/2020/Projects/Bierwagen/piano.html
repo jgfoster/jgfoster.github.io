@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js Interactive Piano</title>
+
+        <!-- Babylon.js -->
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylon.objFileLoader.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var engine = null;
+        var scene = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }); };
+
+        var sustain = false;
+        // Once we're done sustaining, all of these pitches need to be stopped
+        var sustainedNotes = new Set();
+        // Save the pedal for future access
+        var pedal;
+
+        // Defines which octave the computer keyboard controls
+        var octave = 4;
+        var octaveGUI;
+        var octaveText;
+
+        var whiteNotes = ['A0','B0',
+            'C1','D1','E1','F1','G1','A1','B1',
+            'C2','D2','E2','F2','G2','A2','B2',
+            'C3','D3','E3','F3','G3','A3','B3',
+            'C4','D4','E4','F4','G4','A4','B4',
+            'C5','D5','E5','F5','G5','A5','B5',
+            'C6','D6','E6','F6','G6','A6','B6',
+            'C7','D7','E7','F7','G7','A7','B7',
+            'C8'
+        ];
+        // Will be filled when keys are generated
+        var whiteKeys = [];
+
+
+        var blackNotes = ['Bb0',
+            'Db1','Eb1',  'Gb1','Ab1','Bb1',
+            'Db2','Eb2',  'Gb2','Ab2','Bb2',
+            'Db3','Eb3',  'Gb3','Ab3','Bb3',
+            'Db4','Eb4',  'Gb4','Ab4','Bb4',
+            'Db5','Eb5',  'Gb5','Ab5','Bb5',
+            'Db6','Eb6',  'Gb6','Ab6','Bb6',
+            'Db7','Eb7',  'Gb7','Ab7','Bb7'
+        ];
+        // Will be filled when keys are generated
+        var blackKeys = [];
+
+
+        var firstKeyPosition = new BABYLON.Vector3(-2.65, 2.88, -.8);
+        
+        var createScene = function () {
+        
+            // This creates a basic Babylon Scene object (non-mesh)
+            var scene = new BABYLON.Scene(engine);
+
+            // Make the background color black
+            scene.clearColor = new BABYLON.Color3(0, 0, 0);
+        
+            // Create the camera
+            var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, Math.PI/4, 5, new BABYLON.Vector3(0, 2.5, 0), scene);
+        
+            // This attaches the camera to the canvas
+            camera.attachControl(canvas);
+
+            // Create the GUI
+            octaveGUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            octaveText = new BABYLON.GUI.TextBlock();
+            octaveText.text = "Octave: 4";
+            octaveText.color = "white";
+            octaveText.fontSize = 24;
+            octaveText.left = "-45%";
+            octaveText.top = "45%";
+            octaveGUI.addControl(octaveText); 
+
+            var pressKey = function (key, white=true) {
+                // The animation for black keys is offset slightly higher in position, so account for this
+                offset = (white ? 0 : 0.05);
+                var restY = firstKeyPosition.y;
+
+                // Only press if the key isn't already pressed
+                if(key.position.y > restY-.04+offset) {
+                    key.note.setVolume(1, 0.001);
+                    key.note.play();
+
+                    BABYLON.Animation.CreateAndStartAnimation('press', key, 'position.y', 60, 5, restY+offset, restY-.04+offset, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                }
+            }
+
+            var releaseKey = function (key, white=true) {
+                if (sustain) {
+                    sustainedNotes.add(key.note);
+                } else {
+                    key.note.setVolume(0, 0.25);
+                    key.note.stop(0.25);
+                }
+
+                // The animation for black keys is offset slightly higher in position, so account for this
+                offset = (white ? 0 : 0.05);
+                var restY = firstKeyPosition.y;
+                BABYLON.Animation.CreateAndStartAnimation('release', key, 'position.y', 60, 5, restY-.04+offset, restY+offset, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+            }
+
+            var releaseSustainedNotes = function () {
+                sustainedNotes.forEach(note => {
+                    note.setVolume(0, 0.25);
+                    note.stop(0.25);
+                });
+                sustainedNotes.clear();
+            }
+
+            var toggleSustainPedal = function() {
+                sustain = !sustain;
+                if (sustain) {
+                    BABYLON.Animation.CreateAndStartAnimation('pedal_in', pedal, 'position.y', 60, 5, .15, .025, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                } else {
+                    BABYLON.Animation.CreateAndStartAnimation('pedal_in', pedal, 'position.y', 60, 5, .025, .15, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    releaseSustainedNotes();
+                }
+            }
+
+            var createKeys = function (position) {
+                // White Keys
+                var ivory = new BABYLON.StandardMaterial("ivory", scene);
+                ivory.diffuseColor = new BABYLON.Color3(1, 1, 1);
+
+                for (var index = 0; index < 52; index++) {
+                    offset = index * 0.1;
+                    var key = BABYLON.MeshBuilder.CreateBox("key_"+whiteNotes[index], {height: 0.1, width: 0.095, depth: 0.7}, scene);
+                    key.material = ivory;
+                    key.position = new BABYLON.Vector3(position.x + offset, position.y, position.z);
+
+                    key.note = new BABYLON.Sound("note_"+whiteNotes[index], "sounds/"+whiteNotes[index]+".mp3", scene);
+                    key.note.attachToMesh(key);
+
+                    // Actions
+                    key.actionManager = new BABYLON.ActionManager(scene);
+                    key.actionManager.registerAction(
+                        new BABYLON.ExecuteCodeAction(
+                            BABYLON.ActionManager.OnPointerOverTrigger,
+                            function(event) {
+                                pressKey(event.source);
+                            }
+                        )
+                    );
+                    key.actionManager.registerAction(
+                        new BABYLON.ExecuteCodeAction(
+                            BABYLON.ActionManager.OnPointerOutTrigger,
+                            function(event) {
+                                releaseKey(event.source);
+                            }
+                        )
+                    );
+
+                    whiteKeys.push(key);
+                }
+
+                // Black Keys
+
+                // Due to the fact that the spacing of black keys isn't even, we need a separate function to make it easier to place them manually
+                var createBlackKey = function (position, material, index) {
+                    var key = BABYLON.MeshBuilder.CreateBox("key_"+blackNotes[index], {height: 0.1, width: 0.06, depth: 0.45}, scene);
+                    key.material = material;
+                    key.position = position;
+                    key.note = new BABYLON.Sound("note_"+blackNotes[index], "sounds/"+blackNotes[index]+".mp3", scene);
+                    key.note.attachToMesh(key);
+
+                    // Actions
+                    key.actionManager = new BABYLON.ActionManager(scene);
+                    key.actionManager.registerAction(
+                        new BABYLON.ExecuteCodeAction(
+                            BABYLON.ActionManager.OnPointerOverTrigger,
+                            function(event) {
+                                pressKey(event.source, false);
+                            }
+                        )
+                    );
+                    key.actionManager.registerAction(
+                        new BABYLON.ExecuteCodeAction(
+                            BABYLON.ActionManager.OnPointerOutTrigger,
+                            function(event) {
+                                releaseKey(event.source, false);
+                            }
+                        )
+                    );
+
+                    blackKeys.push(key);
+                }
+
+                var ebony = new BABYLON.StandardMaterial("ebony", scene);
+                ebony.diffuseColor = new BABYLON.Color3(0, 0, 0);
+
+                index = 0;
+
+                createBlackKey(new BABYLON.Vector3(position.x+.06 , position.y+.05, position.z+.125), ebony, index);
+
+                for (var offset = 0.2; offset < 5; offset += 0.7) {
+                    index++;
+                    createBlackKey(new BABYLON.Vector3(position.x+.04+offset, position.y+.05, position.z+.125), ebony, index);
+                    index++;
+                    createBlackKey(new BABYLON.Vector3(position.x+.16+offset, position.y+.05, position.z+.125), ebony, index);
+
+                    index++;
+                    createBlackKey(new BABYLON.Vector3(position.x+.34+offset, position.y+.05, position.z+.125), ebony, index);
+                    index++;
+                    createBlackKey(new BABYLON.Vector3(position.x+.45+offset, position.y+.05, position.z+.125), ebony, index);
+                    index++;
+                    createBlackKey(new BABYLON.Vector3(position.x+.56+offset, position.y+.05, position.z+.125), ebony, index);
+                }
+            }
+
+            var createPedal = function (position) {
+                pedal = BABYLON.MeshBuilder.CreateBox("pedal", {height: 0.05, width: 0.2, depth: 0.4}, scene);
+                pedal.position = position;
+                var brass = new BABYLON.StandardMaterial("brass", scene);
+                brass.diffuseColor = new BABYLON.Color3(212, 175, 55);
+                pedal.material = brass;
+
+                // Actions
+                pedal.actionManager = new BABYLON.ActionManager(scene);
+                pedal.actionManager.registerAction(
+                    new BABYLON.ExecuteCodeAction(
+                        BABYLON.ActionManager.OnPickTrigger,
+                        function(event) {
+                            toggleSustainPedal();
+                        }
+                    )
+                );
+
+                return pedal;
+            }
+
+            var configureKeyboard = function() {
+                // Checks to make sure that the given note is within the array range before playing
+                var pressKeySafely = function(index, white=true) {
+                    if (white) {
+                        if (index >= 0 && index < whiteKeys.length) {
+                            pressKey(whiteKeys[index])
+                        }
+                    } else {
+                        if (index >= 0 && index < blackKeys.length) {
+                            pressKey(blackKeys[index], false)
+                        }
+                    }
+                }
+
+                // Checks to make sure that the given note is within the array range before releasing
+                var releaseKeySafely = function(index, white=true) {
+                    if (white) {
+                        if (index >= 0 && index < whiteKeys.length) {
+                            releaseKey(whiteKeys[index])
+                        }
+                    } else {
+                        if (index >= 0 && index < blackKeys.length) {
+                            releaseKey(blackKeys[index], false)
+                        }
+                    }
+                }
+
+                // Allows the octave controlled by the keys to be incremented o
+                var changeOctave = function(increment=true) {
+                    if (increment) {
+                        if (octave < 7) {
+                            octave++;
+                        }
+                    } else if (octave > 0) {
+                        octave--;
+                    }
+                    octaveText.text = "Octave: "+octave;
+                }
+                
+                // Check for keypresses
+                scene.actionManager = new BABYLON.ActionManager(scene);
+
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                    var offsetWhite = octave * 7;
+                    var offsetBlack = octave * 5;
+
+                    // Play the note associated with the pressed key. Comment indicates note sounded when octave = 0.
+                    switch (evt.sourceEvent.key) {
+                        case "a": // C0
+                            pressKeySafely(-5 + offsetWhite);
+                            break;
+                        case "w": // Db0
+                            pressKeySafely(-4 + offsetBlack, false);
+                            break;
+                        case "s": // D0
+                            pressKeySafely(-4 + offsetWhite);
+                            break;
+                        case "e": // Eb0
+                            pressKeySafely(-3 + offsetBlack, false);
+                            break;
+                        case "d": // E0
+                            pressKeySafely(-3 + offsetWhite);
+                            break;
+                        case "f": // F0
+                            pressKeySafely(-2 + offsetWhite);
+                            break;
+                        case "t": // Gb0
+                            pressKeySafely(-2 + offsetBlack, false);
+                            break;
+                        case "g": // G0
+                            pressKeySafely(-1 + offsetWhite);
+                            break;
+                        case "y": // Ab0
+                            pressKeySafely(-1 + offsetBlack, false);
+                            break;
+                        case "h": // A0
+                            pressKeySafely(0 + offsetWhite);
+                            break;
+                        case "u": // Bb0
+                            pressKeySafely(0 + offsetBlack, false);
+                            break;
+                        case "j": // B0
+                            pressKeySafely(1 + offsetWhite);
+                            break;
+                        case "k": // C1
+                            pressKeySafely(2 + offsetWhite);
+                            break;
+                        case "o": // Db1
+                            pressKeySafely(1 + offsetBlack, false);
+                            break;
+                        case "l": // D1
+                            pressKeySafely(3 + offsetWhite);
+                            break;
+                        case "p": // Eb1
+                            pressKeySafely(2 + offsetBlack, false);
+                            break;
+                        case ";": // E1
+                            pressKeySafely(4 + offsetWhite);
+                            break;
+                        case "'": // F1
+                            pressKeySafely(5 + offsetWhite);
+                            break;
+                        case " ": // Sustain Pedal
+                            if (!sustain) {
+                                toggleSustainPedal();
+                            }
+                            break;
+                        case "z": // Decrement Octave
+                            changeOctave(false);
+                            break;
+                        case "x": // Increment Octave
+                            changeOctave();
+                            break;
+                        
+                    }
+
+
+                }));
+
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
+                    var offsetWhite = octave * 7;
+                    var offsetBlack = octave * 5;
+
+                    // Release the note associated with the pressed key. Comment indicates note sounded when octave = 0.
+                    switch (evt.sourceEvent.key) {
+                        case "a": // C0
+                            releaseKeySafely(-5 + offsetWhite);
+                            break;
+                        case "w": // Db0
+                            releaseKeySafely(-4 + offsetBlack, false);
+                            break;
+                        case "s": // D0
+                            releaseKeySafely(-4 + offsetWhite);
+                            break;
+                        case "e": // Eb0
+                            releaseKeySafely(-3 + offsetBlack, false);
+                            break;
+                        case "d": // E0
+                            releaseKeySafely(-3 + offsetWhite);
+                            break;
+                        case "f": // F0
+                            releaseKeySafely(-2 + offsetWhite);
+                            break;
+                        case "t": // Gb0
+                            releaseKeySafely(-2 + offsetBlack, false);
+                            break;
+                        case "g": // G0
+                            releaseKeySafely(-1 + offsetWhite);
+                            break;
+                        case "y": // Ab0
+                            releaseKeySafely(-1 + offsetBlack, false);
+                            break;
+                        case "h": // A0
+                            releaseKeySafely(0 + offsetWhite);
+                            break;
+                        case "u": // Bb0
+                            releaseKeySafely(0 + offsetBlack, false);
+                            break;
+                        case "j": // B0
+                            releaseKeySafely(1 + offsetWhite);
+                            break;
+                        case "k": // C1
+                            releaseKeySafely(2 + offsetWhite);
+                            break;
+                        case "o": // Db1
+                            releaseKeySafely(1 + offsetBlack, false);
+                            break;
+                        case "l": // D1
+                            releaseKeySafely(3 + offsetWhite);
+                            break;
+                        case "p": // Eb1
+                            releaseKeySafely(2 + offsetBlack, false);
+                            break;
+                        case ";": // E1
+                            releaseKeySafely(4 + offsetWhite);
+                            break;
+                        case "'": // F1
+                            releaseKeySafely(5 + offsetWhite);
+                            break;
+                        case " ": // Sustain Pedal
+                            if (sustain) {
+                                toggleSustainPedal();
+                            }
+                            break;
+                        
+                    }
+                }));
+            }
+
+            // Create the floor
+            var floor = BABYLON.MeshBuilder.CreateGround("floor", {width: 35, height: 35}, scene);
+            floor.rotation.y = Math.PI/1.9;
+            var wood = new BABYLON.StandardMaterial("wood", scene);
+	        wood.diffuseTexture = new BABYLON.Texture("textures/Wood_Planks_009_COLOR.jpg", scene);
+            wood.bumpTexture = new BABYLON.Texture("textures/Wood_Planks_009_NORM.jpg", scene);
+            wood.diffuseTexture.uScale = 5.0;
+            wood.diffuseTexture.vScale = 5.0; 
+            floor.material = wood;
+
+            var piano;
+
+            // Create the piano
+            BABYLON.SceneLoader.ImportMesh("", "models/", "piano.obj", scene, function (meshes) {
+                piano = meshes[0];
+                piano.rotation.y = Math.PI;
+                piano.scaling = new BABYLON.Vector3(4.24, 4.24, 4.24);
+                piano.material.diffuseColor = new BABYLON.Color3(.09, .07, .07);
+                piano.material.specularColor = BABYLON.Color3.White();
+            });
+            createKeys(firstKeyPosition);
+            var pedal = createPedal(new BABYLON.Vector3(0, .15, -.2)); 
+
+            // Enable keyboard input
+            configureKeyboard();
+
+            // Create the lamp
+            BABYLON.SceneLoader.ImportMesh("", "models/", "lamp.obj", scene, function (meshes) {
+                meshes[0].rotation.y = Math.PI/4;
+                meshes[1].rotation.y = meshes[0].rotation.y;
+                meshes[0].scaling = new BABYLON.Vector3(.2, .2, .2);
+                meshes[1].scaling = meshes[0].scaling;
+                meshes[0].position = new BABYLON.Vector3(-.3, 4.57, .5);
+                meshes[1].position = meshes[0].position;
+
+                meshes[0].material.backFaceCulling = false;
+                meshes[0].material.diffuseColor = new BABYLON.Color3(0.2, 0, 0);
+                
+                // Lightbulb
+                var light = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(0, 5, .4), scene);
+                light.range = 15;
+                meshes[1].material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+                var gl = new BABYLON.GlowLayer("glow", scene);
+
+                // Shadow
+                var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+                shadowGenerator.getShadowMap().renderList.push(piano);
+                shadowGenerator.setDarkness(0.5);
+                shadowGenerator.useBlurExponentialShadowMap = true;
+                shadowGenerator.blurBoxOffset = 2.0;
+                
+                floor.receiveShadows = true;
+                pedal.receiveShadows = true;
+            });
+        
+            return scene;
+        
+        };
+        
+        engine = createDefaultEngine();
+        if (!engine) throw 'engine should not be null.';
+        scene = createScene();
+
+        engine.runRenderLoop(function () {
+            if (scene) {
+                scene.render();
+            }
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>

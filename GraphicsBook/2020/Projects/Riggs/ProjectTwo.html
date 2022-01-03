@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Rainbow Road Jason Riggs</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+
+       <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+		<script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+		<script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+		<script src="https://cdn.babylonjs.com/cannon.js"></script>
+		<script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    </head>
+
+   <body>
+
+    <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+
+    <script>
+        let canvas = document.getElementById("renderCanvas"); // Get the canvas element 
+        let engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+        /******* Add the create scene function ******/
+        let createScene = function () {
+            let scene, camera, light, ground, wood, redMat, greenMat, blueMat, whiteMat;
+			let road = [];
+			let lWall = [];
+			let rWall = [];
+			let badGuys = [];
+			let badGuy, badGuy2, badGuy3, badGuy4;
+			var lastEventTime = 0;
+			var count = 0;
+			var count2 = 0;
+			
+            function setupScene() { // Scene
+                scene = new BABYLON.Scene(engine);
+				scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+				scene.collisionsEnabled = true;
+            }
+            function setupCamera() { // Camera
+                camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, new BABYLON.Vector3(0,0,0), scene);
+                camera.setPosition(new BABYLON.Vector3(0, 13, -35));
+				camera.lowerBetaLimit = 0.1;
+				camera.upperBetaLimit = (Math.PI / 2) * 0.9;
+				camera.lowerRadiusLimit = 5;
+				camera.upperRadiusLimit = 35;
+                camera.attachControl(canvas, true);
+            }
+            function setupLights() { // Lights
+                light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+            }
+            
+            function setupGround() { // Create Grounds
+                ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 50, height: 100}, scene);
+				ground2 = BABYLON.MeshBuilder.CreateGround("ground2", {width: 50, height: 100}, scene);
+				ground3 = BABYLON.MeshBuilder.CreateGround("ground3", {width: 50, height: 100}, scene);
+				ground4 = BABYLON.MeshBuilder.CreateGround("ground4", {width: 50, height: 100}, scene);
+				ground5 = BABYLON.MeshBuilder.CreateGround("ground4", {width: 50, height: 100}, scene);
+
+				var myMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
+
+				myMaterial.diffuseTexture = new BABYLON.Texture("road5.jpg", scene);
+
+				ground.material = myMaterial;
+				ground2.material = myMaterial;
+				ground3.material = myMaterial;
+				ground4.material = myMaterial;
+				ground5.material = myMaterial;
+				
+				ground2.position.z = 100;
+				ground3.position.z = 200;
+				ground4.position.z = 300;
+				ground5.position.z = 400;
+				
+				road.push(ground);
+				road.push(ground2);
+				road.push(ground3);
+				road.push(ground4);
+				road.push(ground5);
+				
+            }
+			
+			
+			// Setup
+            setupScene();
+            setupCamera();
+            setupLights();
+            setupGround();
+			
+			scene.enablePhysics();
+			
+			// Shot sound
+			var laser = new BABYLON.Sound("laser", "laser.mp3", scene);
+			
+			
+			ground.checkCollisions = true;
+			ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, scene);
+			 
+			// Setup left walls
+			var sideBox = BABYLON.MeshBuilder.CreateBox("sideBox", {height: 4, width: 2, depth: 100}, scene);
+			sideBox.position.x = -25;
+			sideBox.position.y = 2;
+			sideBox.checkCollisions = true;
+			
+			var sideBoxTwo = BABYLON.MeshBuilder.CreateBox("sideBox", {height: 4, width: 2, depth: 100}, scene);
+			sideBoxTwo.position.x = -25;
+			sideBoxTwo.position.y = 2;
+			sideBoxTwo.checkCollisions = true;
+			
+			var sideBoxThree = BABYLON.MeshBuilder.CreateBox("sideBox", {height: 4, width: 2, depth: 100}, scene);
+			sideBoxThree.position.x = -25;
+			sideBoxThree.position.y = 2;
+			sideBoxThree.checkCollisions = true;
+			
+			var sideBoxFour = BABYLON.MeshBuilder.CreateBox("sideBox", {height: 4, width: 2, depth: 100}, scene);
+			sideBoxFour.position.x = -25;
+			sideBoxFour.position.y = 2;
+			sideBoxFour.checkCollisions = true;
+			
+			var sideBoxFive = BABYLON.MeshBuilder.CreateBox("sideBox", {height: 4, width: 2, depth: 100}, scene);
+			sideBoxFive.position.x = -25;
+			sideBoxFive.position.y = 2;
+			sideBoxFive.checkCollisions = true;
+			
+			sideBoxTwo.position.z = 100;
+			sideBoxThree.position.z = 200;
+			sideBoxFour.position.z = 300;
+			sideBoxFive.position.z = 400;
+			
+			lWall.push(sideBox);
+			lWall.push(sideBoxTwo);
+			lWall.push(sideBoxThree);
+			lWall.push(sideBoxFour);
+			lWall.push(sideBoxFive);
+			
+			// Setup right walls
+			var sideBox2 = BABYLON.MeshBuilder.CreateBox("sideBox2", {height: 4, width: 2, depth: 100}, scene);
+			sideBox2.position.x = 25;
+			sideBox2.position.y = 2;
+			sideBox2.checkCollisions = true;
+			
+			var sideBox22 = BABYLON.MeshBuilder.CreateBox("sideBox2", {height: 4, width: 2, depth: 100}, scene);
+			sideBox22.position.x = 25;
+			sideBox22.position.y = 2;
+			sideBox22.checkCollisions = true;
+			
+			var sideBox23 = BABYLON.MeshBuilder.CreateBox("sideBox2", {height: 4, width: 2, depth: 100}, scene);
+			sideBox23.position.x = 25;
+			sideBox23.position.y = 2;
+			sideBox23.checkCollisions = true;
+			
+			var sideBox24 = BABYLON.MeshBuilder.CreateBox("sideBox2", {height: 4, width: 2, depth: 100}, scene);
+			sideBox24.position.x = 25;
+			sideBox24.position.y = 2;
+			sideBox24.checkCollisions = true;
+			
+			var sideBox25 = BABYLON.MeshBuilder.CreateBox("sideBox2", {height: 4, width: 2, depth: 100}, scene);
+			sideBox25.position.x = 25;
+			sideBox25.position.y = 2;
+			sideBox25.checkCollisions = true;
+			
+			sideBox22.position.z = 100;
+			sideBox23.position.z = 200;
+			sideBox24.position.z = 300;
+			sideBox25.position.z = 400;
+			
+			rWall.push(sideBox2);
+			rWall.push(sideBox22);
+			rWall.push(sideBox23);
+			rWall.push(sideBox24);
+			rWall.push(sideBox25);
+			
+			// Add side wall material
+			var boxMaterial = new BABYLON.StandardMaterial("boxMaterial", scene);
+			boxMaterial.diffuseTexture = new BABYLON.Texture("wall.jpg", scene);
+			sideBoxTwo.material = boxMaterial;
+			sideBoxThree.material = boxMaterial;
+			sideBoxFour.material = boxMaterial;
+			sideBoxFive.material = boxMaterial;
+			sideBox.material = boxMaterial;
+			sideBox2.material = boxMaterial;
+			sideBox22.material = boxMaterial;
+			sideBox23.material = boxMaterial;
+			sideBox24.material = boxMaterial;
+			sideBox25.material = boxMaterial;
+			
+			
+			// Space skybox
+			var hdrTexture = new BABYLON.CubeTexture("space", scene);
+			scene.createDefaultSkybox(hdrTexture, true, 10000);
+			
+			
+			// Controls guy
+			var inputMap ={};
+			scene.actionManager = new BABYLON.ActionManager(scene);
+			scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {	
+				inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+			}));
+			scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {								
+				inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+			}));
+			
+			var gamepadManager = new BABYLON.GamepadManager();
+			
+			// Start button
+			var manager = new BABYLON.GUI.GUI3DManager(scene);
+
+			var panel = new BABYLON.GUI.StackPanel3D();
+			panel.margin = 0.02;
+		  
+			manager.addControl(panel);
+			panel.scaling = new BABYLON.Vector3(5, 5, 5);
+			panel.position.z = -5;
+			panel.position.y = 8;
+			
+			badGuy = BABYLON.MeshBuilder.CreateBox("badGuy", {height: 10, width: 5, depth: 2}, scene);
+			badGuy.position.x = 0;
+			badGuy.position.z = 150;
+			badGuy.position.y = 5;
+			badGuy.checkCollisions = true;
+			
+			badGuy2 = BABYLON.MeshBuilder.CreateBox("badGuy", {height: 10, width: 5, depth: 2}, scene);
+			badGuy2.position.x = 10;
+			badGuy2.position.z = 200;
+			badGuy2.position.y = 5;
+			badGuy2.checkCollisions = true;
+			
+			badGuy3 = BABYLON.MeshBuilder.CreateBox("badGuy", {height: 10, width: 5, depth: 2}, scene);
+			badGuy3.position.x = -10;
+			badGuy3.position.z = 250;
+			badGuy3.position.y = 5;
+			badGuy3.checkCollisions = true;
+			
+			badGuy4 = BABYLON.MeshBuilder.CreateBox("badGuy", {height: 10, width: 5, depth: 2}, scene);
+			badGuy4.position.x = 7;
+			badGuy4.position.z = 300;
+			badGuy4.position.y = 5;
+			badGuy4.checkCollisions = true;
+			
+			var guyMaterial = new BABYLON.StandardMaterial("guyMaterial", scene);
+			guyMaterial.diffuseTexture = new BABYLON.Texture("badGuyFace2.jpg", scene);
+			badGuy.material = guyMaterial;
+			badGuy2.material = guyMaterial;
+			badGuy3.material = guyMaterial;
+			badGuy4.material = guyMaterial;
+			
+			badGuy.ellipsoid = new BABYLON.Vector3(1, .2, 2);
+			badGuy2.ellipsoid = new BABYLON.Vector3(1, .2, 2);
+			badGuy3.ellipsoid = new BABYLON.Vector3(1, .2, 2);
+			badGuy4.ellipsoid = new BABYLON.Vector3(1, .2, 2);
+			
+			badGuys.push(badGuy);
+			badGuys.push(badGuy2);
+			badGuys.push(badGuy3);
+			badGuys.push(badGuy4);
+			
+			var addButton = function() {
+				var button = new BABYLON.GUI.Button3D("start");
+				panel.addControl(button);
+				button.onPointerUpObservable.add(function(){
+					var theme = new BABYLON.Sound("theme", "theme.mp3", scene, null, {
+					  loop: true,
+					  autoplay: true
+					});
+					panel.dispose();
+					
+				    
+			
+			
+			// Add guy
+			new BABYLON.SceneLoader.ImportMesh("", "https://www.babylonjs-playground.com/scenes/", "dummy3.babylon", scene, function (newMeshes, particleSystems, skeletons) {
+				var guy = newMeshes[0];
+				guy.scaling = new BABYLON.Vector3(5, 5, 5);
+				camera.target = guy;
+				guy.ellipsoid = new BABYLON.Vector3(1, .2, 2);
+				guy.checkCollisions = true;
+				
+
+				
+				
+				try{
+            
+				var skeleton = skeletons[0];
+				skeleton.animationPropertiesOverride = new BABYLON.AnimationPropertiesOverride();
+				skeleton.animationPropertiesOverride.enableBlending = true;
+				skeleton.animationPropertiesOverride.blendingSpeed = 0.05;
+				skeleton.animationPropertiesOverride.loopMode = 1;
+
+				var runRange = skeleton.getAnimationRange("YBot_Run");
+				
+				var animating = false;
+				// Game/Render loop
+				gamepadManager.onGamepadConnectedObservable.add((gamepad, state)=>{
+					if (gamepad instanceof BABYLON.Xbox360Pad) {
+					//Xbox button down/up events
+					gamepad.onButtonDownObservable.add((button, state)=>{
+						//buttonsText.text = BABYLON.Xbox360Button[button] + " pressed";
+						if(BABYLON.Xbox360Button[button] == 4){
+							var disp = new BABYLON.Vector3(-1,0,0);
+							guy.moveWithCollisions(disp);
+						}
+					})
+					gamepad.onButtonUpObservable.add((button, state)=>{
+						buttonsText.text = BABYLON.Xbox360Button[button] + " released";
+					})
+
+					
+				}
+				
+				
+				})
+				// Endless running
+				scene.registerBeforeRender(function () {
+					guy.position.z += 1;
+					if(guy.intersectsMesh(badGuy, true)) {
+						guy.dispose();
+					}if(guy.intersectsMesh(badGuy2, true)) {
+						guy.dispose();
+					}if(guy.intersectsMesh(badGuy3, true)) {
+						guy.dispose();
+					}if(guy.intersectsMesh(badGuy4, true)) {
+						guy.dispose();
+					}else if(count == 100){
+						if(count2 == 300){
+							var min = 1;
+							var max = 10;
+							var min2 = 1;
+							var max2 = 20;
+							var random = Math.floor(Math.random() * max + min);
+							var random2 = Math.floor(Math.random() * max2 + min2);
+							while ((random > max || random < min) && (random2 > max2 || random2 < min2)) {
+								random = Math.floor(Math.random() * max + min);
+								random2 = Math.floor(Math.random() * max2 + min2);
+							}
+							for(var i=0; i < badGuys.length; i++){
+								badGuys[i].position.z += 300;
+								badGuys[i].position.y = 5;
+								
+							}
+							badGuys[0].position.x = random;
+							badGuys[1].position.x = random2;
+							badGuys[2].position.x = -(random);
+							badGuys[3].position.x = -(random2);
+							count2 = 0;
+						}
+						road[0].position.z += 500;
+						let hold = road.shift();
+						road.push(hold);
+						
+						lWall[0].position.z += 500;
+						let holdWallL = lWall.shift();
+						lWall.push(holdWallL);
+						
+						rWall[0].position.z += 500;
+						let holdWallR = rWall.shift();
+						rWall.push(holdWallR);
+						count = 0;
+						
+					}
+					count++;
+					count2++;
+								
+				});
+				
+				scene.onBeforeRenderObservable.add(()=>{
+					var keydown = true;
+					//var shift = (inputMap["Shift"] ? 0.4 : 0);
+					
+					
+					//if(inputMap["w"]){
+						//guy.position.z += (1 );
+						//keydown=true;
+					//} 
+					if(inputMap["a"]){
+						//guy.position.x -= (1 );
+						var disp = new BABYLON.Vector3(-1,0,0);
+						guy.moveWithCollisions(disp);
+					} 
+					//if(inputMap["s"]){
+						//guy.position.z -= (1 );
+						//keydown=true;
+					//} 
+					if(inputMap["d"]){
+						//guy.position.x += (1 );
+						var disp = new BABYLON.Vector3(1,0,0);
+						guy.moveWithCollisions(disp);
+					}
+					if(keydown){
+						if(!animating){
+							animating = true;
+							scene.beginAnimation(skeleton, runRange.from, runRange.to, true);
+						}
+					}else{
+						animating = false;
+						scene.stopAnimation(skeleton)
+					}
+
+					// Green laser shot
+					if(inputMap["h"]){
+						laser.play();
+						var newEventTime = (new Date).getTime();
+						var timeDelta = newEventTime - lastEventTime;
+						if(timeDelta > 250) {
+							new BABYLON.SceneLoader.ImportMesh("", "https://models.babylonjs.com/TrailMeshSpell/", "greenEnergyBall.glb", scene, function (mesh) {
+							mesh[0].scaling = new BABYLON.Vector3(.1, .1, .1);
+							var sharkPosition = guy.position;
+							var ballPosition = Object.assign({}, sharkPosition);
+							ballPosition.y += 5; 
+							
+							mesh[0].position = ballPosition;
+							mesh[0].checkCollisions = true;
+							
+							scene.registerBeforeRender(function () {
+								mesh[0].position.z += 10;
+								if (mesh[0].intersectsMesh(badGuy, true)) {
+									badGuy.position.y = 1000;
+									mesh[0].dispose();
+								}if (mesh[0].intersectsMesh(badGuy2, true)) {
+									badGuy2.position.y = 1000;
+									mesh[0].dispose();
+								}if (mesh[0].intersectsMesh(badGuy3, true)) {
+									badGuy3.position.y = 1000;
+									mesh[0].dispose();
+								}if (mesh[0].intersectsMesh(badGuy4, true)) {
+									badGuy4.position.y = 1000;
+									mesh[0].dispose();
+								}
+								
+							});
+							});
+							keydown=true;
+							lastEventTime = newEventTime;
+						}
+					}
+				})
+				
+				}catch(e){console.log(e)}
+				
+				
+			});
+			});   
+				
+				var text1 = new BABYLON.GUI.TextBlock();
+				text1.text = "START!";
+				text1.color = "white";
+				text1.fontSize = 60;
+				button.content = text1;  
+			}
+
+			addButton();
+            
+			gamepadManager.onGamepadDisconnectedObservable.add((gamepad, state)=>{
+				console.log("Disconnected");
+			});
+			
+            return scene;
+        };
+
+        /******* End of the create scene function ******/    
+
+        let scene = createScene(); //Call the createScene function
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () { 
+                scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () { 
+                engine.resize();
+        });
+
+    </script>
+
+   </body>
+
+</html>

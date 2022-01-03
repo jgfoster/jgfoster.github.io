@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Babylon Template</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    </head>
+
+   <body>
+
+    <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+    <button id="Promote" style="background-color:white; padding: 10px;font-family: Bakersfield; border:none; font-size: 20px; position: absolute; right: 30px; bottom: 90px;">Promote</button>
+
+    <script>
+        let canvas = document.getElementById("renderCanvas"); // Get the canvas element 
+        let engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+        /******* Add the create scene function ******/
+        let createScene = function () {
+            let scene, camera, light, ground, wood, redMat, greenMat, blueMat, whiteMat;
+
+            var white = [];
+            var black = [];
+            var squares = [];
+            var axis = new BABYLON.Vector3(0, 1, 0);
+            var angle = Math.PI / 2;
+            var quatWh = new BABYLON.Quaternion.RotationAxis(axis, - 1 * angle);
+            var quatBl = new BABYLON.Quaternion.RotationAxis(axis, angle);
+            var capColW = 0;
+            var capRowW = 0;
+            var capColB = 0;
+            var capRowB = 0;
+
+            function setupScene() {
+                scene = new BABYLON.Scene(engine);
+            }
+            function setupCamera() {
+                camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, (Math.PI * 3) / 8, 25, new BABYLON.Vector3(0,0,0), scene);
+                camera.attachControl(canvas, true);
+            }
+            function setupLights() {
+                light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
+            }
+            function setupMaterials() {
+                boardMat = new BABYLON.StandardMaterial("board", scene);
+                boardMat.diffuseTexture = new BABYLON.Texture("drawing.svg", scene);
+                boardMat.specularTexture = new BABYLON.Texture("drawing.svg", scene);
+                boardMat.ambientTexture = new BABYLON.Texture("drawing.svg", scene);
+
+                pawnMat = new BABYLON.StandardMaterial("pawnM", scene);
+                pawnMat.diffuseTexture = new BABYLON.Texture("Pawn.png", scene);
+                pawnMat.specularTexture = new BABYLON.Texture("Pawn.png", scene);
+                pawnMat.ambientTexture = new BABYLON.Texture("Pawn.png", scene);
+
+                lancerMat = new BABYLON.StandardMaterial("lancerM", scene);
+                lancerMat.diffuseTexture = new BABYLON.Texture("Lancer.png", scene);
+                lancerMat.specularTexture = new BABYLON.Texture("Lancer.png", scene);
+                lancerMat.ambientTexture = new BABYLON.Texture("Lancer.png", scene);
+
+                knightMat = new BABYLON.StandardMaterial("knightM", scene);
+                knightMat.diffuseTexture = new BABYLON.Texture("Knight.png", scene);
+                knightMat.specularTexture = new BABYLON.Texture("Knight.png", scene);
+                knightMat.ambientTexture = new BABYLON.Texture("Knight.png", scene);
+
+                silverMat = new BABYLON.StandardMaterial("silverM", scene);
+                silverMat.diffuseTexture = new BABYLON.Texture("Silver.png", scene);
+                silverMat.specularTexture = new BABYLON.Texture("Silver.png", scene);
+                silverMat.ambientTexture = new BABYLON.Texture("Silver.png", scene);
+
+                goldMat = new BABYLON.StandardMaterial("goldM", scene);
+                goldMat.diffuseTexture = new BABYLON.Texture("Gold.png", scene);
+                goldMat.specularTexture = new BABYLON.Texture("Gold.png", scene);
+                goldMat.ambientTexture = new BABYLON.Texture("Gold.png", scene);
+
+                kingMat = new BABYLON.StandardMaterial("kingM", scene);
+                kingMat.diffuseTexture = new BABYLON.Texture("King.png", scene);
+                kingMat.specularTexture = new BABYLON.Texture("King.png", scene);
+                kingMat.ambientTexture = new BABYLON.Texture("King.png", scene);
+
+                rookMat = new BABYLON.StandardMaterial("rookM", scene);
+                rookMat.diffuseTexture = new BABYLON.Texture("Rook.png", scene);
+                rookMat.specularTexture = new BABYLON.Texture("Rook.png", scene);
+                rookMat.ambientTexture = new BABYLON.Texture("Rook.png", scene);
+
+                bishopMat = new BABYLON.StandardMaterial("bishopM", scene);
+                bishopMat.diffuseTexture = new BABYLON.Texture("Bishop.png", scene);
+                bishopMat.specularTexture = new BABYLON.Texture("Bishop.png", scene);
+                bishopMat.ambientTexture = new BABYLON.Texture("Bishop.png", scene);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+                pawnPMat = new BABYLON.StandardMaterial("pawnPM", scene);
+                pawnPMat.diffuseTexture = new BABYLON.Texture("PawnP.png", scene);
+                pawnPMat.specularTexture = new BABYLON.Texture("PawnP.png", scene);
+                pawnPMat.ambientTexture = new BABYLON.Texture("PawnP.png", scene);
+
+                lancerPMat = new BABYLON.StandardMaterial("lancerPM", scene);
+                lancerPMat.diffuseTexture = new BABYLON.Texture("LancerP.png", scene);
+                lancerPMat.specularTexture = new BABYLON.Texture("LancerP.png", scene);
+                lancerPMat.ambientTexture = new BABYLON.Texture("LancerP.png", scene);
+
+                knightPMat = new BABYLON.StandardMaterial("knightPM", scene);
+                knightPMat.diffuseTexture = new BABYLON.Texture("KnightP.png", scene);
+                knightPMat.specularTexture = new BABYLON.Texture("KnightP.png", scene);
+                knightPMat.ambientTexture = new BABYLON.Texture("KnightP.png", scene);
+
+                silverPMat = new BABYLON.StandardMaterial("silverPM", scene);
+                silverPMat.diffuseTexture = new BABYLON.Texture("SilverP.png", scene);
+                silverPMat.specularTexture = new BABYLON.Texture("SilverP.png", scene);
+                silverPMat.ambientTexture = new BABYLON.Texture("SilverP.png", scene);
+
+                rookPMat = new BABYLON.StandardMaterial("rookPM", scene);
+                rookPMat.diffuseTexture = new BABYLON.Texture("RookP.png", scene);
+                rookPMat.specularTexture = new BABYLON.Texture("RookP.png", scene);
+                rookPMat.ambientTexture = new BABYLON.Texture("RookP.png", scene);
+
+                bishopPMat = new BABYLON.StandardMaterial("bishopPM", scene);
+                bishopPMat.diffuseTexture = new BABYLON.Texture("BishopP.png", scene);
+                bishopPMat.specularTexture = new BABYLON.Texture("BishopP.png", scene);
+                bishopPMat.ambientTexture = new BABYLON.Texture("BishopP.png", scene);
+
+
+            }
+            function setupBoard() {
+                board = BABYLON.MeshBuilder.CreateGround("board", { width: 18, height: 18 }, scene);
+                board.material = boardMat;
+                var planeFacing = new BABYLON.Plane(0, 1, 0, 0);
+                planeFacing.normalize();
+                square1 = BABYLON.MeshBuilder.CreatePlane("tile", { size:1.88, sideOrientation:2, sourcePlane: planeFacing }, scene);
+                square1.position = new BABYLON.Vector3(0.06, -0.001, 0.06);
+                for (let i = 0; i < 9; i++) {
+                    for (let i2 = 0; i2 < 9; i2++) {
+                        squares.push(square1.clone(i + "," + i2));
+                        squares[squares.length -1].position.x = (2 * i + 0.06) - 8;
+                        squares[squares.length -1].position.z = (2 * i2 + 0.06) - 8;
+                        squares[squares.length -1].position.y = 0.001;
+                        squares[squares.length -1].visibility = 0;
+                    }
+                }
+                square1.setEnabled(false);
+                var captPotW = BABYLON.MeshBuilder.CreateGround("captPotW", { width: 8, height: 7 }, scene);
+                captPotW.position = new BABYLON.Vector3(13.3, 0.5, -6);
+                var captPotB = BABYLON.MeshBuilder.CreateGround("captPotB", { width: 8, height: 7 }, scene);
+                captPotB.position = new BABYLON.Vector3(-13.3, 0.5, 6);
+                wMat = new BABYLON.StandardMaterial("wMat", scene);
+                wMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                wMat.specularColor = new BABYLON.Color3(1, 1, 1);
+                wMat.ambientColor = new BABYLON.Color3(1, 1, 1);
+                captPotW.material = wMat;
+                bMat = new BABYLON.StandardMaterial("bMat", scene);
+                bMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                bMat.specularColor = new BABYLON.Color3(0, 0, 0);
+                bMat.ambientColor = new BABYLON.Color3(0, 0, 0);
+                captPotB.material = bMat;
+            }
+            function setupOrientationLines(size) {
+                let xLine = BABYLON.MeshBuilder.CreateLines("xLine", {
+                    points: [ new BABYLON.Vector3(0, 0.01, 0), new BABYLON.Vector3(size, 0.01, 0) ], 
+                    colors: [new BABYLON.Color4(1, 0, 0, 1), new BABYLON.Color4(1, 0, 0, 1)]
+                }, scene);
+                let yLine = BABYLON.MeshBuilder.CreateLines("yLine", {
+                    points: [ new BABYLON.Vector3(0, 0.01, 0), new BABYLON.Vector3(0, size + 0.01, 0) ], 
+                    colors: [new BABYLON.Color4(0, 1, 0, 1), new BABYLON.Color4(0, 1, 0, 1)]
+                }, scene);
+                let zLine = BABYLON.MeshBuilder.CreateLines("zLine", {
+                    points: [ new BABYLON.Vector3(0, 0.01, 0), new BABYLON.Vector3(0, 0.01, size) ], 
+                    colors: [new BABYLON.Color4(0, 0, 1, 1), new BABYLON.Color4(0, 0, 1, 1)]
+                }, scene);
+            }
+            function setupPieces() {
+                BABYLON.SceneLoader.ImportMesh(null,"./", "Piece.obj", scene, function (meshes) {
+                    piece1 = meshes[0];
+                    piece1.scaling = new BABYLON.Vector3(0.07, 0.07, 0.07);
+                    for(let i = 0; i < 20; i++){
+                        white.push(piece1.clone(i));
+                        scene.addMesh(white[i]);
+                        white[i].promo = false;
+                        white[i].rotationQuaternion = quatWh;
+                        black.push(piece1.clone(i));
+                        scene.addMesh(black[i]);
+                        black[i].promo = false;
+                        black[i].rotationQuaternion = quatBl;
+                    }
+                    piece1.setEnabled(false);
+                    for(let i = 0; i < 20; i++){
+                    if(i >= 0 && i <= 8){
+                        white[i].position.z = -4;
+                        white[i].position.x = (2 * i) - 7.94;
+                        white[i].material = pawnMat;
+                        white[i].PType = "Pawn";
+                        black[i].position.z = 4;
+                        black[i].position.x = (2 * i) - 7.94;
+                        black[i].material = pawnMat;
+                        black[i].PType = "Pawn";
+                    }
+                    else if(i > 8 && i <= 17){
+                        white[i].position.z = -7.94;
+                        white[i].position.x = (2 * i) - 25.94;
+                        if(i == 9 || i == 10 || i ==  16 || i == 17) {
+                            white[i].scaling = new BABYLON.Vector3(0.073, 0.071, 0.071);
+                            if(i == 9 || i == 17) {
+                                white[i].material = lancerMat;
+                                white[i].PType = "Lancer";
+                            }
+                            else {
+                                white[i].material = knightMat;
+                                white[i].PType = "Knight";
+                            }
+                        }
+                        else if(i == 11 || i == 12 || i ==  14 || i == 15) {
+                            white[i].scaling = new BABYLON.Vector3(0.073, 0.073, 0.073);
+                            if(i == 11 || i == 15) {
+                                white[i].material = silverMat;
+                                white[i].PType = "Silver";
+                            }
+                            else {
+                                white[i].material = goldMat;
+                                white[i].PType = "Gold";
+                            }
+                        }
+                        else if(i == 13) {
+                            white[i].scaling = new BABYLON.Vector3(0.08, 0.08, 0.08);
+                            white[i].material = kingMat;
+                            white[i].PType = "King";
+                        }
+                        black[i].position.z = 7.94;
+                        black[i].position.x = (2 * i) - 25.94;
+                        if(i == 9 || i == 10 || i ==  16 || i == 17) {
+                            black[i].scaling = new BABYLON.Vector3(0.073, 0.071, 0.071);
+                            if(i == 9 || i == 17) {
+                                black[i].material = lancerMat;
+                                black[i].PType = "Lancer";
+                            }
+                            else {
+                                black[i].material = knightMat;
+                                black[i].PType = "Knight";
+                            }
+                        }
+                        else if(i == 11 || i == 12 || i ==  14 || i == 15) {
+                            black[i].scaling = new BABYLON.Vector3(0.073, 0.073, 0.073);
+                            if(i == 11 || i == 15) {
+                                black[i].material = silverMat;
+                                black[i].PType = "Silver";
+                            }
+                            else {
+                                black[i].material = goldMat;
+                                black[i].PType = "Gold";
+                            }
+                        }
+                        else if(i == 13) {
+                            black[i].scaling = new BABYLON.Vector3(0.08, 0.08, 0.08);
+                            black[i].material = kingMat;
+                            black[i].PType = "King";
+                        }
+                    }
+                    else if(i == 18){
+                        white[i].position.z = -5.94;
+                        white[i].position.x = -5.94;
+                        white[i].scaling = new BABYLON.Vector3(0.077, 0.077, 0.077);
+                        white[i].material = bishopMat;
+                        white[i].PType = "Bishop";
+                        black[i].position.z = 5.94;
+                        black[i].position.x = -5.94;
+                        black[i].scaling = new BABYLON.Vector3(0.077, 0.077, 0.077);
+                        black[i].material = rookMat;
+                        black[i].PType = "Rook";
+                    }
+                    else if(i == 19){
+                        white[i].position.z = -5.94;
+                        white[i].position.x = 6.06;
+                        white[i].scaling = new BABYLON.Vector3(0.077, 0.077, 0.077);
+                        white[i].material = rookMat;
+                        white[i].PType = "Rook";
+                        black[i].position.z = 5.94;
+                        black[i].position.x = 6.06;
+                        black[i].scaling = new BABYLON.Vector3(0.077, 0.077, 0.077);
+                        black[i].material = bishopMat;
+                        black[i].PType = "Bishop";
+                    }
+                }
+                });
+            }
+            setupScene();
+            setupCamera();
+            setupLights();
+            setupMaterials();
+            setupBoard();
+            //setupOrientationLines(25);
+            setupPieces();
+            var pickPiece = false;
+            var pickedPiece;
+            document.getElementById("Promote").addEventListener("click", 
+            function () {
+                console.log(pickedPiece.PType, pickedPiece.promo, pickedPiece);
+                if(pickPiece) {    
+                    switch (pickedPiece.PType) {
+                        case "Pawn":
+                            if(pickedPiece.promo) {
+                                pickedPiece.material = pawnMat;
+                                pickedPiece.promo = false;
+                            }
+                            else {
+                                pickedPiece.material = pawnPMat;
+                                pickedPiece.promo = true;
+                            }
+                            break;
+                        case "Lancer":
+                            if(pickedPiece.promo) {
+                                pickedPiece.material = lancerMat;
+                                pickedPiece.promo = false;
+                            }
+                            else {
+                                pickedPiece.material = lancerPMat;
+                                pickedPiece.promo = true;
+                            }
+                            break;
+                        case "Knight":
+                            if(pickedPiece.promo) {
+                                pickedPiece.material = knightMat;
+                                pickedPiece.promo = false;
+                            }
+                            else {
+                                pickedPiece.material = knightPMat;
+                                pickedPiece.promo = true;
+                            }
+                            break;
+                        case "Silver":
+                            if(pickedPiece.promo) {
+                                pickedPiece.material = silverMat;
+                                pickedPiece.promo = false;
+                            }
+                            else {
+                                pickedPiece.material = silverPMat;
+                                pickedPiece.promo = true;
+                            }
+                            break;
+                        case "Rook":
+                            if(pickedPiece.promo) {
+                                pickedPiece.material = rookMat;
+                                pickedPiece.promo = false;
+                            }
+                            else {
+                                pickedPiece.material = rookPMat;
+                                pickedPiece.promo = true;
+                            }
+                            break;
+                        case "Bishop":
+                            if(pickedPiece.promo) {
+                                pickedPiece.material = bishopMat;
+                                pickedPiece.promo = false;
+                            }
+                            else {
+                                pickedPiece.material = bishopPMat;
+                                pickedPiece.promo = true;
+                            }
+                            break;
+                        default: {}
+                    }
+                }
+            });
+
+            window.addEventListener("click", function () {
+                var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+                if ((white.includes(pickResult.pickedMesh) | black.includes(pickResult.pickedMesh)) & (!pickPiece)) {
+                    pickPiece = true;
+                    pickedPiece = pickResult.pickedMesh;
+                    pickedPiece.position.y = 2;
+                }
+                else if (pickPiece & pickedPiece === pickResult.pickedMesh) {
+                    pickPiece = false;
+                    pickedPiece.position.y = 0;
+                    pickedPiece = null;
+                }
+                else if (pickPiece & squares.includes(pickResult.pickedMesh)) {
+                    pickedPiece.position = pickResult.pickedMesh.position;
+                    pickedPiece.position.y = 0;
+                    pickedPiece = null;
+                    pickPiece = false;
+                }
+                else if (pickPiece & ((white.includes(pickedPiece) & black.includes(pickResult.pickedMesh)) | (black.includes(pickedPiece) & white.includes(pickResult.pickedMesh)))) {
+                    pickedPiece.position = pickResult.pickedMesh.position;
+                    if (white.includes(pickedPiece)) {
+                        pickResult.pickedMesh.position = new BABYLON.Vector3(10.3 + (1.5 * capColW), 0.5, -3.4 - (1.7 * capRowW));
+                        capColW += 1;
+                        if(capColW >= 5) {
+                            capColW = 0;
+                            capRowW += 1;
+                        }
+                        pickResult.pickedMesh.rotationQuaternion = quatWh;
+                        white.push(pickResult.pickedMesh);
+                        black = black.filter(function(value, index, arr){ return value != pickResult.pickedMesh;});
+                        switch (pickResult.pickedMesh.PType) {
+                            case "Pawn":
+                                pickResult.pickedMesh.material = pawnMat;
+                                pickResult.pickedMesh.promo = false;
+                                break;
+                            case "Lancer":
+                                pickResult.pickedMesh.material = lancerMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Knight":
+                                pickResult.pickedMesh.material = knightMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Silver":
+                                pickResult.pickedMesh.material = silverMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Rook":
+                                pickResult.pickedMesh.material = rookMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Bishop":
+                                pickResult.pickedMesh.material = bishopMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            default: {}
+                        }
+                    }
+                    else {
+                        pickResult.pickedMesh.position = new BABYLON.Vector3(-10.3 - (1.5 * capColB), 0.5, 3.4 + (1.7 * capRowB));
+                        capColB += 1;
+                        if(capColB >= 5) {
+                            capColB = 0;
+                            capRowB += 1;
+                        }
+                        pickResult.pickedMesh.rotationQuaternion = quatBl;
+                        black.push(pickResult.pickedMesh);
+                        white = white.filter(function(value, index, arr){ return value != pickResult.pickedMesh;});
+                        switch (pickResult.pickedMesh.PType) {
+                            case "Pawn":
+                                pickResult.pickedMesh.material = pawnMat;
+                                pickResult.pickedMesh.promo = false;
+                                break;
+                            case "Lancer":
+                                pickResult.pickedMesh.material = lancerMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Knight":
+                                pickResult.pickedMesh.material = knightMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Silver":
+                                pickResult.pickedMesh.material = silverMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Rook":
+                                pickResult.pickedMesh.material = rookMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            case "Bishop":
+                                pickResult.pickedMesh.material = bishopMat;
+                                pickResult.pickedMesh.promo = true;
+                                break;
+                            default: {}
+                        }
+                    }
+                    pickedPiece = null;
+                    pickPiece = false;
+                }
+            });
+
+            return scene;
+            //sudo google-chrome --allow-file-access-from-files --no-sandbox file:///home/jarodo/Desktop/Computer%20Graphics/Proj/Shogi.html
+            //squares are 2x2
+        };
+
+        /******* End of the create scene function ******/    
+
+        let scene = createScene(); //Call the createScene function
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () { 
+                scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () { 
+                engine.resize();
+        });
+
+    </script>
+
+   </body>
+
+</html>

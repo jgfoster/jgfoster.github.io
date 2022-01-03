@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Block Runner</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    </head>
+
+   <body>
+
+    <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+
+    <script>
+        var canvas = document.getElementById("renderCanvas"); // Get the canvas element
+        var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+        //Initialize global variables
+        var notPicked = false;
+        var hasBeenPicked = false;
+        var advancedTexture, scoreBoard, scoreNumber, highScoreNumber, highScore, score;
+        var currentScore = 0;
+        var currentHighScore = 0;
+
+        spriteManager = [];
+        spriteManager.length = 10
+        spriteArrayPosition = 0;
+        var blenderMeshes = [];
+        blenderMeshes.length = 5;
+
+
+        /******* Add the create scene function ******/
+        var createScene = function () {
+
+            // Create the scene space
+            var scene = new BABYLON.Scene(engine);
+            scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+            // Add a camera to the scene and attach it to the canvas
+            var camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0,1, 28), scene);
+            camera.setTarget(BABYLON.Vector3.Zero())
+            camera.setTarget(new BABYLON.Vector3(0,0,-40), scene);
+
+            //camera.attachControl(canvas, true);
+            camera.speed = 0.7;
+            camera.applyGravity = true;
+            camera.checkCollisions = true;
+            
+            // Add lights to the scene
+            var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 0, 10), scene);
+
+            
+
+            //Initializing Keystrokes
+            var inputMap = {};
+            scene.actionManager = new BABYLON.ActionManager(scene);
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function(evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function(evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+
+            playGame(scene, camera);
+
+            for(var x = 0; x < 10; x++){
+                spriteDirection[x] = true;
+            }
+            
+            scene.registerBeforeRender(function(scene) {
+                //If picked start the scene
+                if(notPicked){
+                    hasBeenPicked = true;
+                    camera.position.z += -0.3;
+                    cameraPositionVariable+= -0.3
+                    if(cameraPositionVariable < -20){
+                        currentScore += 1;
+                        scoreNumber.text = currentScore.toString();
+
+                        if(currentScore > currentHighScore){
+                            currentHighScore = currentScore;
+                            highScoreNumber.text = currentHighScore.toString();
+                        }
+                        cameraPositionVariable = cameraPositionVariable + 20;
+                        if(count > 30){
+                                transformMesh(zTranslation, scene);
+                        }
+                        count++;
+                    }
+                    notPicked = castRay(scene, camera);
+                }else if(hasBeenPicked){
+                    //If crashed re-render scene
+                    disposeItems();
+                    playGame(scene, camera);
+                    hasBeenPicked = false;
+                }
+            });
+
+            //Keystrokes Left and Right
+            scene.onBeforeRenderObservable.add(() =>{
+                if(inputMap["d"] || inputMap["ArrowRight"]) {
+                    if(camera.position.x >= -9 && notPicked){
+                        camera.position.x -=0.33;
+                    }
+                }
+                if(inputMap["a"] || inputMap["ArrowLeft"]) {
+                    if(camera.position.x <= 9 && notPicked){
+                        camera.position.x +=0.33;
+                    }
+                }
+            });
+
+            return scene;
+        };
+
+        var playGame = function (scene, camera) {
+            //initialize variables
+            meshes = [];
+            meshes.length = 30;
+            arrayPosition = 0;
+
+            blenderPosition = 0;
+
+            animations = [];
+            animations.length = 30;
+            animationKeys = [];
+            animationKeys.length = 30;
+            nextAnimation = [];
+            nextAnimation.length = 30;
+
+            pathMeshes = [];
+            pathMeshes.length = 36;
+            pathArrayPosition = 0;
+
+            zTranslation = -20;
+            cameraPositionVariable = 28;
+            count = 30;
+
+            spriteDirection = [];
+            spriteDirection.length = 10;
+
+            camera.position.z = 28;
+            camera.position.x = 0;
+
+            //Call Main Functions
+            playCornFieldChase(scene);
+            currentScore = 0;
+            gui(scene);
+            skyBox(scene);
+            initializeScene(scene);
+            displayScore(scene);
+        }
+
+        //Creates the Start Button
+        var gui = function (scene) {
+
+            var newTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            var button1 = BABYLON.GUI.Button.CreateSimpleButton("but1", 'Click to Begin');
+            button1.width = '210px';
+            button1.height = '210px';
+            button1.color = "white";
+            button1.fontSize = 20;
+            button1.background = "black"
+            button1.thickness = 2;
+            button1.onPointerUpObservable.add(function(){
+                notPicked = true;
+                button1.dispose();
+            });
+            newTexture.addControl(button1);
+        }
+
+        //Highscore and Current Score GUI
+        var displayScore = function (scene) {
+
+            advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            //Score Text
+            score = new BABYLON.GUI.TextBlock();
+            score.text = "SCORE";
+            score.fontSize = 25;
+            score.color = "white";
+            score.top = "-300px";
+            score.left = "550px";
+            advancedTexture.addControl(score);
+
+            //Score
+            scoreNumber = new BABYLON.GUI.TextBlock();
+            scoreNumber.text = currentScore.toString();
+            scoreNumber.fontSize = 100;
+            scoreNumber.color = "white";
+            scoreNumber.top = "-225px";
+            scoreNumber.left = "550x";
+            advancedTexture.addControl(scoreNumber);
+
+            //Highscore Text
+            highScore = new BABYLON.GUI.TextBlock();
+            highScore.text = "HIGH SCORE";
+            highScore.fontSize = 25;
+            highScore.color = "white";
+            highScore.top = "-300px";
+            highScore.left = "-550px";
+            advancedTexture.addControl(highScore);
+
+            //Higshscore Number
+            highScoreNumber = new BABYLON.GUI.TextBlock();
+            highScoreNumber.text = currentHighScore.toString();
+            highScoreNumber.fontSize = 100;
+            highScoreNumber.color = "white";
+            highScoreNumber.top = "-225px";
+            highScoreNumber.left = "-550px";
+            advancedTexture.addControl(highScoreNumber);
+
+
+        }
+
+        //A Ray that checks if the Camera Hits Something
+        var castRay = function(scene, camera){    
+            var origin = camera.position;
+            
+            var forward = new BABYLON.Vector3(0,0,1);		
+            var m = camera.getWorldMatrix();
+            forward = BABYLON.Vector3.TransformCoordinates(forward, m);
+        
+            var direction = forward.subtract(origin);
+            direction = BABYLON.Vector3.Normalize(direction);
+        
+            var length = 1.3;
+        
+            var ray = new BABYLON.Ray(origin, direction, length);
+
+            var hit = scene.pickWithRay(ray);
+
+            if (hit.pickedMesh){
+                console.log("Picked");
+                return false;
+            }
+            return true;
+        }
+
+        //Create the Skybox
+        var skyBox = function (scene) {
+            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500.0}, scene);
+            var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+            skyboxMaterial.backFaceCulling = false;
+            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("skybox", scene);
+            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            skybox.material = skyboxMaterial;
+            skybox.infiniteDistance = true;
+        }
+
+        var initializeScene = function (scene){
+
+                
+            for(var x = 0; x < 5; x++){
+                blenderMeshes[x] = BABYLON.MeshBuilder.CreateBox("box1", {length: 1, width: 20}, scene);
+                blenderMeshes[x].position.z = 40;
+            }
+
+            initializeScenePath();
+            initializeMeshesArray(scene);
+        }
+
+        //Generates Array of Meshes to be used for obstacles
+        var initializeMeshesArray = function(scene){
+            initializeSpritesArray(scene);
+            for(var x = 0; x < 30; x++){
+                var xToString = x.toString();
+                meshes[x] = BABYLON.MeshBuilder.CreateBox(xToString, {length: 3, width: 1, height: 3}, scene);
+                meshes[x].position.z = 60;
+                meshes[x].position.x += x;
+                meshes[x].position.y += x;
+                
+                animations[x] = new BABYLON.Animation("myAnimation", "position.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                animationKeys[x] = []; 
+                animationKeys[x].push({
+                    frame: 0,
+                    value: 0
+                });
+                animations[x].setKeys(animationKeys[x]);
+                meshes[x].animations = [];
+                meshes[x].animations.push(animations[x]);
+                nextAnimation[x] = scene.beginAnimation(meshes[x], 0, 100, true);
+            }
+
+            for(var x = 0; x < 9; x++){
+                generate(scene);
+                arrayPosition = arrayPosition + 3
+            }
+        }
+
+        //Transforms Obstacles overtime
+        var transformMesh = function(zTranslation, scene){
+            if(arrayPosition >= 28){
+                arrayPosition = 0;
+            }
+            if(spriteArrayPosition > 9){
+                spriteArrayPosition = 0;
+            }
+            generate(scene);
+            arrayPosition += 3;
+               
+        }
+
+        //Creates fills an array for the scene path
+        var initializeScenePath = function(){
+
+            blackMaterial = new BABYLON.StandardMaterial("BlackMaterial", scene);
+            blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            blackMaterial.specularColor = new BABYLON.Color3(1, 0.2, 0.6);
+
+            for(var x = 0; x <= 36; x += 3){
+
+                pathMeshes[x] = BABYLON.MeshBuilder.CreateGround("ground", { width: 20, height: 20 }, scene);
+                pathMeshes[x].material = blackMaterial;
+                pathMeshes[x].checkCollisions = true;
+                pathMeshes[x].position.z = 40;
+
+                pathMeshes[x + 1] = BABYLON.MeshBuilder.CreateBox("box1", {length: 1, width: 20}, scene);
+                pathMeshes[x + 1].rotation.y  =  Math.PI/2;
+                pathMeshes[x + 1].position.x = 10;
+                pathMeshes[x + 1].position.z = 40;
+
+                pathMeshes[x + 2] = BABYLON.MeshBuilder.CreateBox("box2", {length: 1, width: 20}, scene);
+                pathMeshes[x + 2].rotation.y  =  Math.PI/2;
+                pathMeshes[x + 2].position.x = -10;
+                pathMeshes[x + 2].position.z = 40;
+
+                pathArrayPosition += 3;
+            }
+
+            scenePath(20);
+            scenePath(0);
+        }
+
+        //Builds and transforms the scene path overtime as you move foward
+        var scenePath = function(zTranslation) {
+            pathArrayPosition += 3;
+            if(pathArrayPosition >= 36){
+                pathArrayPosition = 0;
+            }
+            pathMeshes[pathArrayPosition].position.z = zTranslation;
+            pathMeshes[pathArrayPosition + 1].position.z = zTranslation;
+            pathMeshes[pathArrayPosition + 2].position.z = zTranslation;
+        }
+
+        var initializeSpritesArray = function(scene){
+
+            var spriteManagerTrump = new BABYLON.SpriteManager(
+                "TrumpManager",
+                "https://denysalmaral.com/wp-content/uploads/2017/02/trump_run.png",
+                24, {width: 100, height: 100}, scene);
+
+            for(var x = 0; x < 10; x++){
+                spriteManager[x] = new BABYLON.Sprite("trump", spriteManagerTrump);
+                spriteManager[x].position = new BABYLON.Vector3(9, 1, 40);
+                spriteManager[x].size = 3;
+                spriteManager[x].cellIndex = 8;
+                spriteManager.checkCollisions = false;
+            }
+            var intervalID = window.setInterval(runTrump, 100, spriteManager);
+        }
+
+        var runTrump = function (spriteManager) {
+            
+            for(var x = 0; x < 10; x++){
+                if(spriteDirection[x]){
+                    if(spriteManager[x].cellIndex < 8){
+                        spriteManager[x].cellIndex = 8;
+                    }else if (spriteManager[x].cellIndex > 10){
+                        spriteManager[x].cellIndex = 8;
+                    }else{
+                        spriteManager[x].cellIndex++;
+                    }
+
+                    spriteManager[x].position.x -= 0.3;
+                    
+                    if(spriteManager[x].position.x  < -8.7){
+                        spriteDirection[x] = false;
+                    }
+                }else{
+                    if(spriteManager[x].cellIndex < 18){
+                        spriteManager[x].cellIndex = 18;
+                    }else if (spriteManager[x].cellIndex > 20){
+                        spriteManager[x].cellIndex = 18;
+                    }else{
+                        spriteManager[x].cellIndex++;
+                    }
+
+                    spriteManager[x].position.x += 0.3;
+                    
+                    if(spriteManager[x].position.x  > 8.7){
+                        spriteDirection[x] = true;
+                    }
+                }
+            }
+        }
+
+        //Randomly picks what obstacle to generate
+        var generate = function(scene){
+
+            scenePath(zTranslation);
+
+            if(zTranslation == -400){
+                scene9(zTranslation, scene);
+            }else{
+                var randomNumber = Math.floor(Math.random() * 10);
+                switch (randomNumber){
+                    case 1:
+                        scene1(zTranslation, scene);
+                        break;
+                    case 2:
+                        scene2(zTranslation, scene);
+                        break;
+                    case 3:
+                        scene3(zTranslation, scene);
+                        break;
+                    case 4:
+                        scene4(zTranslation, scene);
+                        break;
+                    case 5:
+                        scene5(zTranslation, scene);
+                        break;
+                    case 6:
+                        scene6(zTranslation, scene);
+                        break;
+                    case 7:
+                        scene7(zTranslation, scene);
+                        break;
+                    case 8:
+                        scene8(zTranslation, scene);
+                        break;
+                    case 9:
+                        scene10(zTranslation, scene);
+                        break;
+                    case 0:
+                        scene2(zTranslation, scene);
+                        break;
+                    default:
+                        scene1(zTranslation, scene);
+                        break;
+                }
+            }
+            zTranslation = zTranslation - 20;
+        }
+
+        //The Following Scenes are different variations of obstacles that
+        //can be picked to be randomly generated
+
+        var scene1 = function(zTranslation){
+
+            nextAnimation[arrayPosition].pause();
+
+            meshes[arrayPosition].scaling.x = 14;
+            meshes[arrayPosition].position.x = 0;
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.z = zTranslation;
+        }
+
+        var scene2 = function(zTranslation){
+
+            nextAnimation[arrayPosition].pause();
+            nextAnimation[arrayPosition + 1].pause();
+
+            meshes[arrayPosition].scaling.x = 8.3;
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = -5.4;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            meshes[arrayPosition + 1].scaling.x = 8.3
+            meshes[arrayPosition + 1].position.y = 0.2;
+            meshes[arrayPosition + 1].position.x = 5.4;
+            meshes[arrayPosition + 1].position.z = zTranslation;
+
+            meshes[arrayPosition].checkCollisions = true;
+            meshes[arrayPosition + 1].checkCollisions = true;
+
+        }
+
+        var scene3 = function(zTranslation){
+
+            nextAnimation[arrayPosition].pause();
+            nextAnimation[arrayPosition + 1].pause();
+            nextAnimation[arrayPosition + 2].pause();
+
+            meshes[arrayPosition].scaling.x = 6
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = -6.5;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            
+            meshes[arrayPosition + 1].scaling.x = 6;
+            meshes[arrayPosition + 1].position.y = 0.2;
+            meshes[arrayPosition + 1].position.x = 6.5;
+            meshes[arrayPosition + 1].position.z = zTranslation;
+
+            meshes[arrayPosition + 2].scaling.x = 2.5;
+            meshes[arrayPosition + 2].position.y = 0.2;
+            meshes[arrayPosition + 2].position.x = 0;
+            meshes[arrayPosition + 2].position.z = zTranslation;
+
+            meshes[arrayPosition].checkCollisions = true;
+            meshes[arrayPosition + 1].checkCollisions = true;
+            meshes[arrayPosition + 2].checkCollisions = true;
+
+        }
+
+        var scene4 = function(zTranslation){
+
+            nextAnimation[arrayPosition].pause();
+
+            meshes[arrayPosition].scaling.x = 16.5;
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = -1.25;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            meshes[arrayPosition].checkCollisions = true;
+
+        }
+
+        var scene5 = function(zTranslation){
+
+            nextAnimation[arrayPosition].pause();
+
+            meshes[arrayPosition].scaling.x = 17;
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = 1;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            meshes[arrayPosition].checkCollisions = true;
+
+        }
+        var scene6 = function(zTranslation, scene){
+
+            meshes[arrayPosition].scaling.x = 4
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = -7.5;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            animationKeys[arrayPosition] = [];
+            animationKeys[arrayPosition].push({
+                frame: 0,
+                value: -7.5
+            });
+            animationKeys[arrayPosition].push({
+                frame: 20,
+                value: 7.5
+            });
+            animationKeys[arrayPosition].push({
+                frame: 100,
+                value: -7.5
+            });
+
+            animations[arrayPosition].setKeys(animationKeys[arrayPosition]);
+            meshes[arrayPosition].animations.pop();
+            meshes[arrayPosition].animations.push(animations[arrayPosition]);
+            nextAnimation[arrayPosition] = scene.beginAnimation(meshes[arrayPosition], 100, 0, true);
+        }
+
+        var scene7 = function(zTranslation, scene){
+            //Box1 
+            meshes[arrayPosition].scaling.x = 4;
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = -7.5;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            animationKeys[arrayPosition] = []; 
+            animationKeys[arrayPosition].push({
+                frame: 0,
+                value: -7.5
+            });
+            animationKeys[arrayPosition].push({
+                frame: 50,
+                value: -2
+            });
+            animationKeys[arrayPosition].push({
+                frame: 100,
+                value: -7.5
+            });
+            animations[arrayPosition].setKeys(animationKeys[arrayPosition]);
+            meshes[arrayPosition].animations.pop();
+            meshes[arrayPosition].animations.push(animations[arrayPosition]);
+            nextAnimation[arrayPosition] = scene.beginAnimation(meshes[arrayPosition], 0, 100, true);
+            nextAnimation[arrayPosition].restart();
+            //Box2
+            meshes[arrayPosition + 1].scaling.x = 4;
+            meshes[arrayPosition + 1].position.y = 0.2;
+            meshes[arrayPosition + 1].position.x = 7.5;
+            meshes[arrayPosition + 1].position.z = zTranslation;
+
+            animationKeys[arrayPosition + 1] = []; 
+            animationKeys[arrayPosition + 1].push({
+                frame: 0,
+                value: 7.5
+            });
+            animationKeys[arrayPosition + 1].push({
+                frame: 50,
+                value: 2
+            });
+            animationKeys[arrayPosition + 1].push({
+                frame: 100,
+                value: 7.5
+            });
+            animations[arrayPosition + 1].setKeys(animationKeys[arrayPosition + 1]);
+            meshes[arrayPosition + 1].animations.pop();
+            meshes[arrayPosition + 1].animations.push(animations[arrayPosition + 1]);
+            nextAnimation[arrayPosition + 1] = scene.beginAnimation(meshes[arrayPosition + 1], 0, 100, true);
+            nextAnimation[arrayPosition + 1].restart();
+        }
+
+        var scene8 = function(zTranslation, scene){
+            meshes[arrayPosition].scaling.x = 8;
+            meshes[arrayPosition].position.y = 0.2;
+            meshes[arrayPosition].position.x = -5.5;
+            meshes[arrayPosition].position.z = zTranslation;
+
+            animationKeys[arrayPosition] = []; 
+            animationKeys[arrayPosition].push({
+                frame: 0,
+                value: -5.5
+            });
+            animationKeys[arrayPosition].push({
+                frame: 50,
+                value: 5.5
+            });
+            animationKeys[arrayPosition].push({
+                frame: 100,
+                value: -5.5
+            });
+
+            animations[arrayPosition].setKeys(animationKeys[arrayPosition]);
+            meshes[arrayPosition].animations.pop();
+            meshes[arrayPosition].animations.push(animations[arrayPosition]);
+            nextAnimation[arrayPosition] = scene.beginAnimation(meshes[arrayPosition], 0, 100, true);
+            nextAnimation[arrayPosition].restart();
+        }
+
+        var scene9 = function(zTranslation, scene){
+            spriteManager[spriteArrayPosition].position = new BABYLON.Vector3(9, 1, zTranslation);
+            spriteArrayPosition += 1;
+            
+        }
+
+        var scene10 = function(zTranslation, scene){
+
+            whiteMaterial = new BABYLON.StandardMaterial("BlackMaterial", scene);
+            whiteMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+            whiteMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+
+            if(blenderPosition > 4){
+                blenderPosition = 0
+            }
+
+            function importMesh() {
+                BABYLON.SceneLoader.ImportMesh(null, "./", "object1.babylon", scene, function (aMesh, particleSystems, skeletons) {
+                    blenderMeshes[blenderPosition].dispose();
+                    blenderMeshes[blenderPosition] = aMesh[0];
+                    blenderMeshes[blenderPosition].position.x = -3.5;
+                    blenderMeshes[blenderPosition].scaling.x = 6;
+                    blenderMeshes[blenderPosition].position.z = zTranslation;
+                    blenderMeshes[blenderPosition].checkCollisions = true;
+                    blenderMeshes[blenderPosition].material = whiteMaterial;
+
+                });
+            }
+            importMesh();
+            blenderPosition++;
+        }
+
+        // var scene11 = function(zTranslation, scene){
+        //     whiteMaterial = new BABYLON.StandardMaterial("WhiteMaterial", scene);
+        //     whiteMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+        //     whiteMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+
+        //     if(blenderPosition > 4){
+        //         blenderPosition = 0
+        //     }
+
+        //     function importMesh() {
+        //         BABYLON.SceneLoader.ImportMesh(null, "./", "object3.babylon", scene, function (aMesh, particleSystems, skeletons) {
+        //             blenderMeshes[blenderPosition].dispose();
+        //             blenderMeshes[blenderPosition] = aMesh[0];
+        //             blenderMeshes[blenderPosition].position.x = -4.5;
+        //             blenderMeshes[blenderPosition].scaling.x = 1.3;
+        //             blenderMeshes[blenderPosition].scaling.y = 0.7;
+        //             blenderMeshes[blenderPosition].position.z = zTranslation;
+        //             blenderMeshes[blenderPosition].checkCollisions = true;
+        //             blenderMeshes[blenderPosition].material = whiteMaterial;
+
+        //         });
+        //     }
+        //     importMesh();
+        //     blenderPosition++;
+        // }
+
+        //Derenders rendered all rendered items
+        var disposeItems = function (){
+            
+
+
+            for(var x = 0; x < 36; x++){
+                pathMeshes[x].dispose();
+            }
+            for(var x = 0; x < 30; x++){
+                meshes[x].dispose();
+            }
+            for(var x = 0; x < 10; x++){
+                spriteManager[x].dispose();
+            }
+            for(var x = 0; x < 5; x++){
+                blenderMeshes[x].dispose();
+            }
+
+            score.dispose();
+            scoreNumber.dispose();
+            highScoreNumber.dispose();
+            highScore.dispose();
+
+        }
+
+        //backgroundSong
+        var playCornFieldChase = function (scene){
+            var playCornField = new BABYLON.Sound(
+                "CornField", "sounds/CornfieldChase.mp3",
+                scene, null, {loop: false, autoplay: true}
+            );
+        }
+        
+        /******* End of the create scene function ******/    
+
+        var scene = createScene(); //Call the createScene function
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () { 
+                scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () { 
+                engine.resize();
+        });
+    </script>
+
+   </body>
+</html>

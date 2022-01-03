@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Final Project</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+        <!-- Babylon.js -->
+        <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/libktx.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    </head>
+
+   <body>
+
+    <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+
+    <script>
+        var canvas = document.getElementById("renderCanvas"); // Get the canvas element
+        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }); // Generate the BABYLON 3D engine
+
+        /******* Create Class for the drivable Kart ******/
+        class DrivingKart {
+            constructor(material,mesh,returnCamera) {
+                // Setting object attributes
+                this.power = 30;
+                this.speed = new BABYLON.Vector3();
+                this.maxSpeed = 120;
+                this.turnSpeed = 0;
+                this.maxTurnSpeed = 2;
+                this.turnAcceleration = 40;
+                this.body = mesh;
+                this.camera = returnCamera;
+                this.body.position = new BABYLON.Vector3(-432, 2, 60);
+                this.body.rotationQuaternion = new BABYLON.Quaternion();
+                this.body.material = material;
+            }
+            // For moving the Kart
+            update(inputMap, deltaTime) {
+                if (inputMap["q"]) {
+                  scene.activeCamera = this.camera;
+                  scene.removeMesh(this.body);
+                }
+                if (inputMap["w"] || inputMap["ArrowUp"]) {
+                    this.speed.z += this.power * deltaTime;
+                }
+                if (inputMap["s"] || inputMap["ArrowDown"]) {
+                    this.speed.set(0, 0, 0);
+                }
+                if (inputMap["d"] || inputMap["ArrowRight"]) {
+                    this.turnSpeed += this.turnAcceleration * deltaTime;
+                    this.body.rotationQuaternion.multiplyInPlace(BABYLON.Quaternion.RotationAxis(new BABYLON.Vector3(0, 1, 0), this.turnSpeed * deltaTime));
+                }
+                if (inputMap["a"] || inputMap["ArrowLeft"]) {
+                    this.turnSpeed -= this.turnAcceleration * deltaTime;
+                    this.body.rotationQuaternion.multiplyInPlace(BABYLON.Quaternion.RotationAxis(new BABYLON.Vector3(0, 1, 0), this.turnSpeed * deltaTime));
+                }
+                if (!(inputMap["d"] || inputMap["ArrowRight"]) && !(inputMap["a"] || inputMap["ArrowLeft"])) {
+                    this.turnSpeed = 0;
+                }
+                if (Math.abs(this.turnSpeed) > this.maxTurnSpeed) {
+                    this.turnSpeed = BABYLON.Scalar.Sign(this.turnSpeed) * this.maxTurnSpeed;
+                }
+                if (this.speed.length() > this.maxSpeed) {
+                    this.speed.normalize().scaleInPlace(this.maxSpeed);
+                }
+                var mat = new BABYLON.Matrix();
+                this.body.rotationQuaternion.toRotationMatrix(mat);
+                var newPosition = BABYLON.Vector3.TransformCoordinates(this.speed.scale(deltaTime), mat);
+                this.body.moveWithCollisions(newPosition);
+            }
+        }
+
+        /******* Add the create scene function ******/
+        var createScene = function () {
+          // Create Scene
+        	var scene = new BABYLON.Scene(engine);
+          scene.clearColor = new BABYLON.Color3(0, 0, 0);
+          scene.collisionsEnabled = true;
+
+          /******* Flags ******/
+          var emissiveFlag = true;
+
+          /******* Import Kart ******/
+          var kartMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
+          kartMaterial.diffuseColor = new BABYLON.Color3(1, 1, 0);
+          var kart = BABYLON.MeshBuilder.CreateBox("kart", {size: 6}, scene);
+          kart.material = kartMaterial;
+          kart.position = new BABYLON.Vector3(-432,3,84);
+          kart.isVisible = false;
+
+          /******* Array for touchable Items ******/
+          var allCoins = [];
+          var allQuestions = [];
+          var allParticles = [];
+
+          /******* Materials ******/
+
+          // Colors
+          var colors = [
+        		new BABYLON.Color3(1, 0.1, 0),
+        		new BABYLON.Color3(0.2, 0.9, 0),
+        		new BABYLON.Color3(1, 1, 0),
+        		new BABYLON.Color3(0.1, 0.2, 1),
+            new BABYLON.Color4(0, 0, 0, 0),
+            new BABYLON.Color3(1, 1, 1)
+        	]
+
+          // Box Materials
+          var redMaterial = new BABYLON.StandardMaterial("redMaterial", scene);
+          redMaterial.diffuseColor = colors[0];
+          var greenMaterial = new BABYLON.StandardMaterial("greenMaterial", scene);
+          greenMaterial.diffuseColor = colors[1];
+          var yellowMaterial = new BABYLON.StandardMaterial("yellowMaterial", scene);
+          yellowMaterial.diffuseColor = colors[2];
+          var blueMaterial = new BABYLON.StandardMaterial("blueMaterial", scene);
+          blueMaterial.diffuseColor = colors[3];
+
+          // Ground Material
+          var groundMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
+          groundMaterial.ambientTexture = new BABYLON.Texture("marioKartTrack.png", scene);
+          //groundMaterial.ambientTexture = new BABYLON.Texture("file:///C:/Users/atg20/Dropbox/School/2nd%20Quarter/Computer%20Graphics/Final%20Project/media/marioKartTrack.png", scene);
+
+          // SkyBox material
+          var skyBoxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+          skyBoxMaterial.backFaceCulling = false;
+          skyBoxMaterial.reflectionTexture = new BABYLON.CubeTexture("skyBox/sky", scene);
+          skyBoxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+          skyBoxMaterial.disableLighting = true;
+          var skyBox = BABYLON.Mesh.CreateBox("skyBox", 2000, scene);
+          skyBox.material = skyBoxMaterial;
+          skyBox.renderingGroupId = 0;
+
+          // Banner Material
+          var bannerMaterial = new BABYLON.StandardMaterial("bannerMaterial", scene);
+          bannerMaterial.ambientTexture = new BABYLON.Texture("logo.png", scene);
+
+          // Question Box Material
+          var questionMaterial = new BABYLON.StandardMaterial("questionMaterial", scene);
+          questionMaterial.diffuseTexture = new BABYLON.Texture("questionBox.png", scene);
+
+          /******* Creating Cameras ******/
+          var buttonCamera, simKartCamera, driveCamera, forwardCamera;
+          createButtonsCamera();
+          createSimKartCamera();
+          createDriveCamera();
+
+          // Buttons Camera
+          function createButtonsCamera() {
+            buttonCamera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(-703,300,-703), scene);
+            buttonCamera.setTarget(new BABYLON.Vector3(-700,300,-700));
+          }
+          // Kart Cameras
+          function createSimKartCamera() {
+            simKartCamera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(-432, 15, 30), scene);
+            simKartCamera.radius = 10;
+            simKartCamera.heightOffset = 10;
+            simKartCamera.rotationOffset = 10;
+            simKartCamera.cameraAcceleration = 0.02;
+            simKartCamera.maxCameraSpeed = 12;
+            simKartCamera.attachControl(canvas, true);
+            simKartCamera.lockedTarget = kart;
+          }
+          function createDriveCamera() {
+            driveCamera = new BABYLON.FreeCamera("driveCamera", new BABYLON.Vector3(0, 5, -10), scene);
+            driveCamera.setTarget(BABYLON.Vector3.Zero());
+            driveCamera.attachControl(canvas, true);
+          }
+
+          // Set starting camera for scene
+          scene.activeCamera = buttonCamera;
+
+          /******* Add Lights ******/
+          var hemiLight = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene);
+          var pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(600, 300, 400), scene);
+          // Sun
+          var sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
+          sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0);
+          var sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 100}, scene);
+          sun.position = new BABYLON.Vector3(600,300,400);
+          sun.material = sunMaterial;
+
+          /******* Creating Ground ******/
+          createGround();
+          function createGround() {
+            var myGround = BABYLON.MeshBuilder.CreateGround("myGround", {width: 1024, height: 1024}, scene);
+            myGround.material = groundMaterial;
+            // Set ground to receive shadows
+            myGround.receiveShadows = true;
+          }
+
+          /******* Creating Wall Blocks ******/
+          createWalls();
+          function createBoxLine(startBox,startPosition,endPosition,constPosition,constAxis) {
+            // Setting variables
+            var x = 0, y = 4, z = 0;
+            var offset = 32;
+            var increment = 128;
+            var direction = true;
+            var names = ["redBox","greenBox","yellowBox","blueBox"];
+            var colorNames = ["redMaterial", "greenMaterial","yellowMaterial","blueMaterial"];
+            var boxColor = names.indexOf(startBox);
+
+            // Setting direction
+            if (startPosition > endPosition) {
+              increment = -128;
+              direction = false;
+            } else {
+              increment = 128;
+              direction = true;
+            }
+
+            // Setting the constant axis
+            if(constAxis == "x") {
+              x = constPosition;
+            } else if(constAxis == "z") {
+              z = constPosition;
+            }
+
+            // Depending on what direction the boxes are going
+            if(direction) {
+              // loop for box color
+              for (let a = 0; a < 4; a++) {
+                var boxColorName = names[boxColor];
+                var boxColorTexture = colorNames[boxColor];
+                var flag1 = true,flag2 = true;
+                // loop for all boxes of color in range
+                for (let i = startPosition + offset * a; i < endPosition; i += increment) {
+                  // loop for each individual box
+                  for (let j = i; (j < (i + 32)) && (j <= endPosition); j += 8) {
+                    var boxNameJ = j.toString();
+                    if(constAxis == 'x') {
+                      z = j;
+                      var boxNameTempX = x.toString();
+                      var boxNameX = boxNameTempX.replace("-","Negative");
+                      var boxNameZ = boxNameJ.replace("-","Negative");
+                    } else if(constAxis == 'z') {
+                      x = j;
+                      var boxNameTempZ = z.toString();
+                      var boxNameX = boxNameJ.replace("-","Negative");
+                      var boxNameZ = boxNameTempZ.replace("-","Negative");
+                    }
+                    var boxName = boxColorName.concat(boxNameX,"_",boxNameZ);
+                    eval('var ' + boxName + ' = ' + 'BABYLON.MeshBuilder.CreateBox("' + boxColorName + '", {size: 8.0}, scene);');
+                    eval(boxName + '.position = new BABYLON.Vector3(' + x + ',' + y + ',' + z + ');');
+                    eval(boxName + '.material = ' + boxColorTexture);
+                    eval(boxName + '.checkCollisions = true;');
+                  }
+                }
+                // setting boxColor increment
+                if (boxColor == 3) {
+                  boxColor = 0;
+                } else {
+                  boxColor++;
+                }
+              }
+            } else {
+              // loop for box color
+              for (let a = 0; a < 4; a++) {
+                var boxColorName = names[boxColor];
+                var boxColorTexture = colorNames[boxColor];
+                // loop for all boxes of color in range
+                for (let i = startPosition - offset * a; i > endPosition; i += increment) {
+                  // loop for each individual box
+                  for (let j = i; (j > (i - 32)) && (j >= endPosition); j -= 8) {
+                    var boxNameJ = j.toString();
+                    if(constAxis == 'x') {
+                      z = j;
+                      var boxNameTempX = x.toString();
+                      var boxNameX = boxNameTempX.replace("-","Negative");
+                      var boxNameZ = boxNameJ.replace("-","Negative");
+                    } else if(constAxis == 'z') {
+                      x = j;
+                      var boxNameTempZ = z.toString();
+                      var boxNameX = boxNameJ.replace("-","Negative");
+                      var boxNameZ = boxNameTempZ.replace("-","Negative");
+                    }
+                    var boxName = boxColorName.concat(boxNameX,"_",boxNameZ);
+                    eval('var ' + boxName + ' = ' + 'BABYLON.MeshBuilder.CreateBox("' + boxColorName + '", {size: 8.0}, scene);');
+                    eval(boxName + '.position = new BABYLON.Vector3(' + x + ',' + y + ',' + z + ');');
+                    eval(boxName + '.material = ' + boxColorTexture);
+                    eval(boxName + '.checkCollisions = true;');
+                  }
+                }
+                // setting boxColor increment
+                if (boxColor == 3) {
+                  boxColor = 0;
+                } else {
+                  boxColor++;
+                }
+              }
+            }
+          }
+          function createWalls() {
+            createOutsideWalls();
+            createInsideWalls();
+            createFatBox();
+            createSkinnyBox();
+            createJaggedWall();
+
+            function createOutsideWalls() {
+              // Positive Z Wall
+              createBoxLine("redBox",-508,-52,508,'z');
+              createBoxLine("blueBox",52,60,508,'z');
+              createBoxLine("redBox",68,508,508,'z');
+              // Positive X Wall
+              createBoxLine("yellowBox",500,28,508,'x');
+              createBoxLine("blueBox",-44,-508,508,'x');
+              // Negative Z Wall
+              createBoxLine("greenBox",500,484,-508,'z');
+              createBoxLine("yellowBox",476,-508,-508,'z');
+              // Negative X Wall
+              createBoxLine("redBox",-500,-492,-508,'x');
+              createBoxLine("greenBox",-484,500,-508,'x');
+            }
+            function createInsideWalls() {
+              // Final Turn Straight
+              createBoxLine("yellowBox",-340,-244,348,'z');
+              // Turn 5 left
+              createBoxLine("greenBox",348,132,-244,'x');
+              // Turn 5 - 4 straight
+              createBoxLine("redBox",-236,156,132,'z');
+              // Turn 4 jagged
+              createBoxLine("redBox",140,148,156,'x');
+              createBoxLine("greenBox",156,180,156,'z');
+              createBoxLine("yellowBox",156,180,188,'x');
+              createBoxLine("blueBox",196,220,180,'z');
+              // Turn 4 straight
+              createBoxLine("redBox",180,324,228,'x');
+              // Roundabout top
+              createBoxLine("redBox",228,236,324,'z');
+              createBoxLine("greenBox",244,332,324,'z');
+              // Roundabout side
+              createBoxLine("redBox",316,164,332,'x');
+              // Roundabout bottom
+              createBoxLine("greenBox",332,212,156,'z');
+              // Tilted straight jagged right
+              createBoxLine("greenBox",148,140,212,'x');
+              createBoxLine("greenBox",212,204,132,'z');
+              createBoxLine("yellowBox",196,188,132,'z');
+              createBoxLine("yellowBox",132,124,180,'x');
+              createBoxLine("blueBox",116,108,180,'x');
+              // Tilted Straight straight
+              createBoxLine("blueBox",172,164,108,'z');
+              createBoxLine("redBox",156,-28,108,'z');
+              createBoxLine("yellowBox",108,84,-36,'x');
+              createBoxLine("blueBox",-44,-244,84,'z');
+              // Hairpin Straight
+              createBoxLine("greenBox",76,68,-244,'x');
+              createBoxLine("yellowBox",60,-44,-244,'x');
+              createBoxLine("greenBox",-244,-252,-52,'z');
+              createBoxLine("yellowBox",-260,-268,-52,'z');
+              createBoxLine("yellowBox",-60,-68,-268,'x');
+              createBoxLine("blueBox",-76,-228,-268,'x');
+              // Straight Straight
+              createBoxLine("redBox",-260,324,-228,'z');
+              // Turn 3 - 2
+              createBoxLine("yellowBox",-228,-240,332,'x');
+              createBoxLine("blueBox",-244,-300,332,'x');
+              // Turn 2 straight
+              createBoxLine("greenBox",332,212,-308,'z');
+              createBoxLine("greenBox",204,196,-308,'z');
+              // 1st spill right
+              createBoxLine("greenBox",-300,-252,196,'x');
+              // 1st spill straight
+              createBoxLine("blueBox",188,-180,-252,'z');
+              // 2nd spill left
+              createBoxLine("yellowBox",-252,-260,-188,'x');
+              createBoxLine("blueBox",-268,-324,-188,'x');
+              createBoxLine("greenBox",-332,-340,-188,'x');
+              // Turn 1 flat
+              createBoxLine("greenBox",-196,-204,-340,'z');
+              createBoxLine("yellowBox",-212,-332,-340,'z');
+              // Turn 1 spike
+              createBoxLine("redBox",-348,-404,-268,'x');
+              createBoxLine("yellowBox",-404,-348,-276,'x');
+              // Straightaway
+              createBoxLine("yellowBox",-340,-220,-340,'x');
+              // Straightaway jagged
+              for(let i = 0; i < 560; i += 80) {
+                createBoxLine("yellowBox",-340,-364,(-212+i),'z');
+                createBoxLine("blueBox",(-204+i),(-180+i),-364,'x');
+                createBoxLine("redBox",-340,-364,(-172+i),'z');
+                createBoxLine("greenBox",(-164+i),(-140+i),-340,'x');
+              }
+            }
+            function createFatBox() {
+              // Left Wall
+              createBoxLine("yellowBox",500,492,-52,'x');
+              createBoxLine("blueBox",484,284,-52,'x');
+              // Front Wall
+              createBoxLine("greenBox",-44,-36,284,'z');
+              createBoxLine("yellowBox",-28,44,284,'z');
+              // Right Wall
+              createBoxLine("redBox",284,292,52,'x');
+              createBoxLine("greenBox",300,500,52,'x');
+            }
+            function createSkinnyBox() {
+              // 1st Edge Boxes
+              createBoxLine("greenBox",-500,-468,12,'x');
+              createBoxLine("blueBox",-500,-468,4,'x');
+              // 2nd Edge Boxes
+              createBoxLine("yellowBox",-468,-436,12,'x');
+              createBoxLine("redBox",-468,-436,4,'x');
+              // 1st Seperate Boxes
+              createBoxLine("redBox",-420,-404,12,'x');
+              createBoxLine("greenBox",-420,-404,4,'x');
+              // 2nd Seperate Boxes
+              createBoxLine("blueBox",-396,-380,12,'x');
+              createBoxLine("yellowBox",-396,-380,4,'x');
+            }
+            function createJaggedWall() {
+              // Top Wall
+              createBoxLine("greenBox",508,308,20,'z');
+              createBoxLine("blueBox",12,4,308,'x');
+              createBoxLine("redBox",-4,-12,308,'x');
+              createBoxLine("redBox",300,292,-12,'z');
+              createBoxLine("greenBox",284,132,-12,'z');
+              createBoxLine("yellowBox",-20,-44,132,'x');
+              createBoxLine("blueBox",132,-20,-52,'z');
+              createBoxLine("yellowBox",-52,-60,-28,'x');
+              createBoxLine("yellowBox",-36,-44,-60,'z');
+              // Bottom Wall
+              createBoxLine("redBox",-60,140,-68,'z');
+              createBoxLine("yellowBox",-68,-60,148,'x');
+              createBoxLine("blueBox",-52,-44,148,'x');
+              createBoxLine("blueBox",148,156,-36,'z');
+              createBoxLine("redBox",164,508,-36,'z');
+            }
+          }
+
+          /******* Trees ******/
+          createTrees();
+          function createTrees() {
+            var spriteManagerTrees = new BABYLON.SpriteManager("treesManager","tree.png", 2000, {width: 320, height: 555}, scene);
+            // Trees in long rectangle
+            for (var i = 0; i < 10; i++) {
+              var tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+              tree.position.x = Math.random() * (-330 + 280) - 280;
+              tree.position.y = 25;
+              tree.position.z = Math.random() * (330 + 320) - 320;
+              tree.isPickable = true;
+              tree.size = 50;
+            }
+            // Trees in fat side box
+            for (var i = 0; i < 5; i++) {
+              var tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+              tree.position.x = Math.random() * (40 + 40) - 40;
+              tree.position.y = 25;
+              tree.position.z = Math.random() * (500 - 300) + 300;
+              tree.isPickable = true;
+              tree.size = 50;
+            }
+            // Trees in positive box
+            for (var i = 0; i < 5; i++) {
+              var tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+              tree.position.x = Math.random() * (320 - 240) + 240;
+              tree.position.y = 25;
+              tree.position.z = Math.random() * (310 - 170) + 170;
+              tree.isPickable = true;
+              tree.size = 50;
+            }
+            // Trees in skinny side box
+            for (var i = 0; i < 5; i++) {
+              var tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+              tree.position.x = Math.random() * (500 - 300) + 300;
+              tree.position.y = 25;
+              tree.position.z = Math.random() * (20 + 30) - 30;
+              tree.isPickable = true;
+              tree.size = 50;
+            }
+            // Trees in skinny middle box
+            for (var i = 0; i < 5; i++) {
+              var tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+              tree.position.x = Math.random() * (320 - 210) + 210;
+              tree.position.y = 25;
+              tree.position.z = Math.random() * (-240 + 290) - 290;
+              tree.isPickable = true;
+              tree.size = 50;
+            }
+          }
+
+          /******* Create Finish Line ******/
+          createFinishLine();
+          function createFinishLine() {
+            createScaffolding();
+            createFinishBanner();
+            function createScaffolding() {
+              // Create Left Pillar
+              var finishBoxLeft = BABYLON.MeshBuilder.CreateBox("finishBoxLeft", {height: 80, width: 8, depth: 8}, scene);
+              finishBoxLeft.position = new BABYLON.Vector3(-476,40,84);
+              finishBoxLeft.material = redMaterial;
+              finishBoxLeft.checkCollisions = true;
+              // Create Right Pillar
+              var finishBoxRight = BABYLON.MeshBuilder.CreateBox("finishBoxRight",{height: 80, width: 8, depth: 8}, scene);
+              finishBoxRight.position = new BABYLON.Vector3(-388,40,84);
+              finishBoxRight.material = greenMaterial;
+              finishBoxRight.checkCollisions = true;
+              // Create Top Pillar
+              var finishBannerTop = BABYLON.MeshBuilder.CreateBox("finishBannerTop", {height: 4, width: 80, depth: 4}, scene);
+              finishBannerTop.position = new BABYLON.Vector3(-432,78,84);
+              finishBannerTop.material = yellowMaterial;
+              // Create Bottom Pillar
+              var finishBannerBottom = BABYLON.MeshBuilder.CreateBox("finishBannerBottom", {height: 4, width: 80, depth: 4}, scene);
+              finishBannerBottom.position = new BABYLON.Vector3(-432,58,84);
+              finishBannerBottom.material = blueMaterial;
+            }
+            function createFinishBanner() {
+              // Create planes with banner
+              bannerMaterial.backFaceCulling = false;
+              var banner1 = BABYLON.MeshBuilder.CreatePlane("banner1", {width: 80, height: 16}, scene);
+              banner1.material = bannerMaterial;
+              banner1.position = new BABYLON.Vector3(-432,68,82);
+              var banner2 = BABYLON.MeshBuilder.CreatePlane("banner1", {width: 80, height: 16}, scene);
+              banner2.material = bannerMaterial;
+              banner2.rotation = new BABYLON.Vector3(0, Math.PI, 0);
+              banner2.position = new BABYLON.Vector3(-432,68,86);
+
+            }
+          }
+
+          /******* Create Cheering People ******/
+          createCrowd();
+          function createCrowd() {
+            createPeople();
+            createBleachers();
+            function createPeople() {
+              // Start making sprite texture
+              var mat = new BABYLON.StandardMaterial("mat1", scene);
+              mat.alpha = 1.0;
+              mat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+              mat.specularColor = new BABYLON.Color3(1, 1, 1);
+              mat.ambientColor = new BABYLON.Color3(1, 1, 1);
+              var texture = new BABYLON.Texture("man.png", scene);
+              mat.diffuseTexture = texture;
+
+              var hSpriteNb =  7;  // 7 sprites per raw
+              var vSpriteNb =  1;  // 1 sprite raws
+
+              var faceUV = new Array(6);
+
+              for (var i = 0; i < 6; i++) {
+            	  faceUV[i] = new BABYLON.Vector4(0, 0, 0, 0);
+              }
+              faceUV[1] = new BABYLON.Vector4(0, 0, 1 / hSpriteNb, 1 / vSpriteNb);
+
+              for(let x = -480, y = 4; x >= -486; x -=3, y +=8) {
+                for(let z = 133; z <= 175; z += 6) {
+                  var box = BABYLON.MeshBuilder.CreateBox('box', {width: 6, height: 8, depth: 3, faceUV: faceUV}, scene);
+                  box.material = mat;
+                  box.position = new BABYLON.Vector3(x,y,z);
+                  box.rotation = new BABYLON.Vector3(0, Math.PI*3/2, 0);
+                  box.checkCollisions = true;
+                }
+              }
+              var frameNumber = 0;
+             scene.registerBeforeRender(function() {
+               if (++frameNumber % 7 == 0) {
+            	    texture.uOffset += 1/7;
+               }
+             });
+           }
+           function createBleachers() {
+             // Left bleachers
+             var bleacherBoxTallLeft = BABYLON.MeshBuilder.CreateBox("bleacherBoxTallLeft", {height: 24, width: 3, depth: 3}, scene);
+             bleacherBoxTallLeft.position = new BABYLON.Vector3(-486,12,128.5);
+             bleacherBoxTallLeft.material = redMaterial;
+             var bleacherBoxMediumLeft = BABYLON.MeshBuilder.CreateBox("bleacherBoxMediumLeft", {height: 16, width: 3, depth: 3}, scene);
+             bleacherBoxMediumLeft.position = new BABYLON.Vector3(-483,8,128.5);
+             bleacherBoxMediumLeft.material = greenMaterial;
+             var bleacherBoxShortLeft = BABYLON.MeshBuilder.CreateBox("bleacherBoxShortLeft", {height: 8, width: 3, depth: 3}, scene);
+             bleacherBoxShortLeft.position = new BABYLON.Vector3(-480,4,128.5);
+             bleacherBoxShortLeft.material = yellowMaterial;
+             bleacherBoxTallLeft.checkCollisions = true;
+             bleacherBoxMediumLeft.checkCollisions = true;
+             bleacherBoxShortLeft.checkCollisions = true;
+
+             // Right Bleachers
+             var bleacherBoxTallRight = BABYLON.MeshBuilder.CreateBox("bleacherBoxTallRight", {height: 24, width: 3, depth: 3}, scene);
+             bleacherBoxTallRight.position = new BABYLON.Vector3(-486,12,179.5);
+             bleacherBoxTallRight.material = redMaterial;
+             var bleacherBoxMediumRight = BABYLON.MeshBuilder.CreateBox("bleacherBoxMediumRight", {height: 16, width: 3, depth: 3}, scene);
+             bleacherBoxMediumRight.position = new BABYLON.Vector3(-483,8,179.5);
+             bleacherBoxMediumRight.material = greenMaterial;
+             var bleacherBoxShortRight = BABYLON.MeshBuilder.CreateBox("bleacherBoxShortRight", {height: 8, width: 3, depth: 3}, scene);
+             bleacherBoxShortRight.position = new BABYLON.Vector3(-480,4,179.5);
+             bleacherBoxShortRight.material = yellowMaterial;
+             bleacherBoxTallRight.checkCollisions = true;
+             bleacherBoxMediumRight.checkCollisions = true;
+             bleacherBoxShortRight.checkCollisions = true;
+
+             // Top of Bleacher
+             var bleacherBoxTop = BABYLON.MeshBuilder.CreateBox("bleacherBoxTallRight", {height: 3, width: 54, depth: 3}, scene);
+             bleacherBoxTop.position = new BABYLON.Vector3(-486,25.5,154);
+             bleacherBoxTop.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
+             bleacherBoxTop.material = blueMaterial;
+           }
+          }
+
+          /******* Create Coin Particles ******/
+          createCoins();
+          function createCoins() {
+            positiveZCoins();
+            middleCoins();
+            negativeZCoins();
+            function positiveZCoins() {
+              // 1-3
+              createCoin(-412,4,188);
+              createCoin(-428,4,188);
+              createCoin(-445,4,188);
+              // 4-6
+              createCoin(-405,4,420);
+              createCoin(-389,4,405);
+              createCoin(-373,4,389);
+              // 7-9
+              createCoin(-301,4,451);
+              createCoin(-301,4,436);
+              createCoin(-301,4,420);
+              // 10-12
+              createCoin(92,4,236);
+              createCoin(107,4,221);
+              createCoin(123,4,205);
+              // 13-15
+              createCoin(404,4,164);
+              createCoin(388,4,133);
+              createCoin(357,4,118);
+            }
+            function middleCoins() {
+              // 16-20
+              createCoin(-69,4,-13);
+              createCoin(-85,4,-28);
+              createCoin(-100,4,-44);
+              createCoin(-108,4,-60);
+              createCoin(-108,4,-75);
+              // 21-24
+              createCoin(-108,4,-91);
+              createCoin(-100,4,-107);
+              createCoin(-85,4,-122);
+              createCoin(-69,4,-138);
+              // 25-29
+              createCoin(-93,4,-75);
+              createCoin(-124,4,-75);
+              createCoin(-140,4,-75);
+              createCoin(-155,4,-75);
+              createCoin(-170,4,-75);
+              // 30-31
+              createCoin(-155,4,-91);
+              createCoin(-155,4,-60);
+            }
+            function negativeZCoins() {
+              // 32-34
+              createCoin(149,4,-107);
+              createCoin(149,4,-123);
+              createCoin(149,4,-139);
+              // 35-37
+              createCoin(274,4,-107);
+              createCoin(274,4,-123);
+              createCoin(274,4,-139);
+              // 38-40
+              createCoin(107,4,-307);
+              createCoin(91,4,-323);
+              createCoin(75,4,-339);
+              // 41-43
+              createCoin(-27,4,-331);
+              createCoin(-42,4,-315);
+              createCoin(-58,4,-300);
+            }
+            function createCoin(x,y,z) {
+                // Naming
+                var coinName = "coin";
+                var particleName = "particle";
+                var xName = x.toString();
+                xName = xName.replace("-","Negative");
+                var yName = y.toString();
+                yName = yName.replace("-","Negative");
+                var zName = z.toString();
+                zName = zName.replace("-","Negative");
+                coinName = coinName.concat(xName,"_",yName,"_",zName);
+                particleName = particleName.concat(xName,"_",yName,"_",zName);
+                var coinLength = allCoins.length;
+                var particleLength = allParticles.length;
+                allCoins[coinLength] = coinName;
+                allParticles[particleLength] = particleName;
+
+                // Create the fountain
+                eval(coinName + ' = BABYLON.MeshBuilder.CreateSphere("' + coinName + '", {diameter: 3}, scene);');
+                var fountainMaterial = new BABYLON.StandardMaterial("fountainMaterial", scene);
+                fountainMaterial.diffuseColor = new BABYLON.Color3(1, 1, 0);
+                fountainMaterial.alpha = 0.5;
+                eval(coinName + '.material = fountainMaterial;');
+                eval(coinName + '.position = new BABYLON.Vector3(x,y,z);');
+
+                // Create the particles
+                eval(particleName + '= new BABYLON.ParticleSystem("' + particleName + '", 2000, scene);');
+                eval(particleName + '.particleTexture = new BABYLON.Texture("particle.png", scene);');
+                eval(particleName + '.emitter = ' + coinName + ';'); // the starting object, the emitter
+                eval(particleName + '.minSize = 1;');
+                eval(particleName + '.maxSize = 3;');
+                eval(particleName + '.minEmitBox = new BABYLON.Vector3(-2, -1, -2);');
+                eval(particleName + '.maxEmitBox = new BABYLON.Vector3(2, 1, 2);');
+                eval(particleName + '.minLifeTime = 0.3;');
+                eval(particleName + '.maxLifeTime = 1.5;');
+                eval(particleName + '.emitRate = 50;');
+                eval(particleName + '.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;');
+                eval(particleName + '.gravity = new BABYLON.Vector3(0, -9.81, 0);');
+                eval(particleName + '.start();');
+            }
+          }
+
+          /******* Create Question Boxes ******/
+          createQuestions();
+          function createQuestions() {
+            // Set 1
+            createQuestionBox(-139,246);
+            createQuestionBox(-111,232);
+            createQuestionBox(-81,225);
+            // Set 2
+            createQuestionBox(130,342);
+            createQuestionBox(144,318);
+            createQuestionBox(158,295);
+            // Set 3
+            createQuestionBox(305,54);
+            createQuestionBox(283,70);
+            createQuestionBox(262,85);
+            // Set 4
+            createQuestionBox(-8,-103);
+            createQuestionBox(-8,-128);
+            createQuestionBox(-8,-153);
+            // Set 5
+            createQuestionBox(316,-438);
+            createQuestionBox(298,-420);
+            createQuestionBox(281,-401);
+            // Set 6
+            createQuestionBox(-103,-396);
+            createQuestionBox(-125,-398);
+            createQuestionBox(-149,-401);
+          }
+          function createQuestionBox(x,z) {
+            // Naming
+            var questionName = "question";
+            var xName = x.toString();
+            xName = xName.replace("-","Negative");
+            var zName = z.toString();
+            zName = zName.replace("-","Negative");
+            questionName = questionName.concat(xName,"_",zName);
+            var questionLength = allQuestions.length;
+            allQuestions[questionLength] = questionName;
+
+            // Create box
+            eval(questionName + ' = BABYLON.MeshBuilder.CreateBox("' + questionName + '", {size: 4}, scene);');
+            eval(questionName + '.position = new BABYLON.Vector3(x,(Math.random() * (5.9 - 4.1) + 4.1),z);');
+            eval(questionName + '.material = questionMaterial;');
+            var direction = true;
+
+            // Animation
+            scene.registerBeforeRender(function () {
+                    // Check if box is moving up
+                    let time = new Date().getTime();
+                    eval(questionName + '.rotation.z = time / 700 % 8;');
+                    eval(questionName + '.rotation.y = time / 700 % 8;');
+                    eval('var boxPosition = ' + questionName + '.position.y;');
+                    if (boxPosition < 6 && direction) {
+                        // Increment box position to the right
+                        eval(questionName + '.position.y += 0.05;');
+                    }
+                    else {
+                        // Swap directions to move left
+                        direction = false;
+                    }
+
+                    // Check if box is moving down
+                    if (boxPosition > 4 && !direction) {
+                        // Decrement box position to the left
+                        eval(questionName + '.position.y -= 0.05;');
+                    }
+                    else {
+                        // Swap directions to move right
+                        direction = true;
+                    }
+                });
+          }
+
+          /******* Shadow Generator ******/
+          function createShadows(mesh) {
+            var shadowGenerator = new BABYLON.ShadowGenerator(1024, pointLight);
+  	        shadowGenerator.addShadowCaster(mesh);
+  	        shadowGenerator.useExponentialShadowMap = true;
+          }
+
+          /******* Create Music ******/
+          addMusic();
+          function addMusic() {
+            var music = new BABYLON.Sound("Music", "music.mp3", scene, null, {
+                                          loop: true,
+                                          autoplay: true
+                                        });
+          }
+
+          /******* Kart Animation ******/
+          function animateKart() {
+            // Start with creating the animation manager
+            var kartFrames = 200;
+            var moveKart = new BABYLON.Animation("moveKart", "position", kartFrames, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+          	var moveKart_keys = [];
+
+              // Frame 1
+              moveKart_keys.push({
+                  frame: 0,
+                  value: new BABYLON.Vector3(-432, 3, 84)
+              });
+              // Frame 2
+              moveKart_keys.push({
+                  frame: 104,
+                  value: new BABYLON.Vector3(-428, 3, 188)
+              });
+              // Frame 3
+              moveKart_keys.push({
+                  frame: 337,
+                  value: new BABYLON.Vector3(-405, 3, 420)
+              });
+              // Frame 4
+              moveKart_keys.push({
+                  frame: 446,
+                  value: new BABYLON.Vector3(-301, 3, 451)
+              });
+              // Frame 5
+              moveKart_keys.push({
+                  frame: 604,
+                  value: new BABYLON.Vector3(-180, 3, 350)
+              });
+              // Frame 6
+              moveKart_keys.push({
+                  frame: 764,
+                  value: new BABYLON.Vector3(-81, 3, 225)
+              });
+              // Frame 7
+              moveKart_keys.push({
+                  frame: 952,
+                  value: new BABYLON.Vector3(107, 3, 221)
+              });
+              // Frame 8
+              moveKart_keys.push({
+                  frame: 1056,
+                  value: new BABYLON.Vector3(144, 3, 318)
+              });
+              // Frame 9
+              moveKart_keys.push({
+                  frame: 1231,
+                  value: new BABYLON.Vector3(270, 3, 440)
+              });
+              // Frame 10
+              moveKart_keys.push({
+                  frame: 1386,
+                  value: new BABYLON.Vector3(420, 3, 400)
+              });
+              // Frame 11
+              moveKart_keys.push({
+                  frame: 1656,
+                  value: new BABYLON.Vector3(420, 3, 130)
+              });
+              // Frame 12
+              moveKart_keys.push({
+                  frame: 1806,
+                  value: new BABYLON.Vector3(283, 3, 70)
+              });
+              // Frame 13
+              moveKart_keys.push({
+                  frame: 2187,
+                  value: new BABYLON.Vector3(-85, 3, -28)
+              });
+              // Frame 14
+              moveKart_keys.push({
+                  frame: 2239,
+                  value: new BABYLON.Vector3(-108, 3, -75)
+              });
+              // Frame 15
+              moveKart_keys.push({
+                  frame: 2291,
+                  value: new BABYLON.Vector3(-85, 3, -122)
+              });
+              // Frame 16
+              moveKart_keys.push({
+                  frame: 2368,
+                  value: new BABYLON.Vector3(-8, 3, -128)
+              });
+              // Frame 17
+              moveKart_keys.push({
+                  frame: 2525,
+                  value: new BABYLON.Vector3(149, 3, -123)
+              });
+              // Frame 18
+              moveKart_keys.push({
+                  frame: 2650,
+                  value: new BABYLON.Vector3(274, 3, -123)
+              });
+              // Frame 19
+              moveKart_keys.push({
+                  frame: 2787,
+                  value: new BABYLON.Vector3(410, 3, -140)
+              });
+              // Frame 20
+              moveKart_keys.push({
+                  frame: 3008,
+                  value: new BABYLON.Vector3(430, 3, -360)
+              });
+              // Frame 21
+              moveKart_keys.push({
+                  frame: 3163,
+                  value: new BABYLON.Vector3(281, 3, -401)
+              });
+              // Frame 22
+              moveKart_keys.push({
+                  frame: 3304,
+                  value: new BABYLON.Vector3(140, 3, -401)
+              });
+              // Frame 23
+              moveKart_keys.push({
+                  frame: 3396,
+                  value: new BABYLON.Vector3(91, 3, -323)
+              });
+              // Frame 24
+              moveKart_keys.push({
+                  frame: 3529,
+                  value: new BABYLON.Vector3(-42, 3, -315)
+              });
+              // Frame 25
+              moveKart_keys.push({
+                  frame: 3646,
+                  value: new BABYLON.Vector3(-125, 3, -398)
+              });
+              // Frame 26
+              moveKart_keys.push({
+                  frame: 3858,
+                  value: new BABYLON.Vector3(-325, 3, -470)
+              });
+              // Frame 27
+              moveKart_keys.push({
+                  frame: 4084,
+                  value: new BABYLON.Vector3(-432, 3, -270)
+              });
+              // Frame 28
+              moveKart_keys.push({
+                  frame: 4484,
+                  value: new BABYLON.Vector3(-432, 3, 100)
+              });
+              // Frame 29 (Stop Frame)
+              moveKart_keys.push({
+                  frame: 5000,
+                  value: new BABYLON.Vector3(-432, 3, 100)
+              });
+
+              // Put the keys with the manager
+              moveKart.setKeys(moveKart_keys);
+              createShadows(kart);
+              scene.beginDirectAnimation(kart, [moveKart], 0, kartFrames * 5000, false, 1, function () {
+                  scene.activeCamera = buttonCamera;
+                  kart.isVisible = false;
+              });
+            }
+
+          /******* Adding GUI ******/
+          addGUI();
+          function addGUI() {
+
+            // Adding manager/panel
+            var manager = new BABYLON.GUI.GUI3DManager(scene);
+            var panel = new BABYLON.GUI.SpherePanel();
+            panel.margin = 0.2;
+            manager.addControl(panel);
+            panel.node.rotation.y -= 0.25;
+            panel.position = new BABYLON.Vector3(-700,300,-700);
+
+            // Add buttons
+            var button3 = new BABYLON.GUI.HolographicButton("orientation");
+            panel.addControl(button3);
+            var button2 = new BABYLON.GUI.HolographicButton("orientation");
+            panel.addControl(button2);
+            var button1 = new BABYLON.GUI.HolographicButton("orientation");
+            panel.addControl(button1);
+
+            // Race text
+            var buttonText1 = new BABYLON.GUI.TextBlock();
+            buttonText1.text = "Race!!!";
+            buttonText1.color = "black";
+            buttonText1.fontSize = 55;
+
+            // Simulated race text
+            var buttonText2 = new BABYLON.GUI.TextBlock();
+            buttonText2.text = "Simulated\nRace";
+            buttonText2.color = "black";
+            buttonText2.fontSize = 55;
+
+            // Black light text
+            var buttonText3 = new BABYLON.GUI.TextBlock();
+            buttonText3.text = "On/Off\nBlack Lights";
+            buttonText3.color = "black";
+            buttonText3.fontSize = 55;
+
+            // Add text to buttons
+            button1.content = buttonText1;
+            button2.content = buttonText2;
+            button3.content = buttonText3;
+
+            // Adding control to buttons
+
+            // Race Button
+            button1.onPointerClickObservable.add(() => {
+              // Make sure all the coins are visible
+              for (let i = 0; i < allCoins.length; i++) {
+                var name = allCoins[i];
+                var name2 = allParticles[i];
+                eval(name + '.isVisible = true;');
+                eval(name2 + '.start();');
+              }
+              // Make sure all question boxes are visible
+              for (let i = 0; i < allQuestions.length; i++) {
+                var name = allQuestions[i];
+                eval(name + '.isVisible = true;');
+              }
+              scene.activeCamera = driveCamera;
+              driveKart();
+            });
+            // Simulated Race Button
+            button2.onPointerClickObservable.add(() => {
+              kart.isVisible = true;
+              scene.activeCamera = simKartCamera;
+              animateKart();
+              for (let i = 0; i < allCoins.length; i++) {
+                var name = allCoins[i];
+                var name2 = allParticles[i];
+                eval(name + '.isVisible = true;');
+                eval(name2 + '.start();');
+              }
+              // Make sure all question boxes are visible
+              for (let i = 0; i < allQuestions.length; i++) {
+                var name = allQuestions[i];
+                eval(name + '.isVisible = true;');
+              }
+            });
+            // Black/Lights Button
+            button3.onPointerClickObservable.add(() => {
+              changeLights();
+            });
+          }
+          function changeLights() {
+            if(emissiveFlag) {
+              // Turn on glow
+              redMaterial.emissiveColor = colors[0];
+              greenMaterial.emissiveColor = colors[1];
+              yellowMaterial.emissiveColor = colors[2];
+              blueMaterial.emissiveColor = colors[3];
+              bannerMaterial.emissiveColor = colors[5];
+              questionMaterial.emissiveColor = colors[5];
+              kartMaterial.emissiveColor = colors[2];
+
+              // Turn down Lights
+              pointLight.setEnabled(false);
+              hemiLight.intensity = 0.3;
+
+              // Make things invisible
+              sun.isVisible = false;
+              skyBox.isVisible = false;
+
+              // reset flag
+              emissiveFlag = false;
+            } else {
+              // Turn off Glow
+              redMaterial.emissiveColor = colors[4];
+              greenMaterial.emissiveColor = colors[4];
+              yellowMaterial.emissiveColor = colors[4];
+              blueMaterial.emissiveColor = colors[4];
+              bannerMaterial.emissiveColor = colors[4];
+              questionMaterial.emissiveColor = colors[4];
+              kartMaterial.emissiveColor = colors[4];
+
+              // Turn up Lights
+              pointLight.setEnabled(true);
+              hemiLight.intensity = 1;
+
+              // Make things visible
+              sun.isVisible = true;
+              skyBox.isVisible = true;
+
+              // reset flag
+              emissiveFlag = true;
+            }
+          }
+
+          /******* DRIVING KART ******/
+          function driveKart() {
+            // Create the Kart to drive
+            var tempKart = BABYLON.Mesh.CreateSphere("kartBody", 16, 4, scene);
+            tempKart.checkCollisions = true;
+            var drivingKart = new DrivingKart(kartMaterial, tempKart,buttonCamera);
+            createShadows(drivingKart.body);
+            // Keyboard events
+            var inputMap = {};
+            scene.actionManager = new BABYLON.ActionManager(scene);
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+            // Render loop
+            scene.onBeforeRenderObservable.add(() => {
+                drivingKart.update(inputMap, scene.getEngine().getDeltaTime() / 1000);
+                drivingKart.body.computeWorldMatrix(true);
+                drivingKart.body.ellipsoid = new BABYLON.Vector3(5, 5, 5);
+                drivingKart.body.checkCollisions = true;
+                driveCamera.position.copyFrom(drivingKart.body.position.subtract(drivingKart.body.forward.scale(25)).add(new BABYLON.Vector3(0, 6, 0)));
+                driveCamera.setTarget(drivingKart.body.position);
+            });
+            for (let i = 0; i < allCoins.length; i++) {
+              var name = allCoins[i];
+              var name2 = allParticles[i];
+              eval(name + '.actionManager = new BABYLON.ActionManager(scene);');
+              eval(name + '.actionManager.registerAction(new BABYLON.ExecuteCodeAction({trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,parameter: {mesh: tempKart,usePreciseIntersection: true}},function () {' + name2 + '.stop();' + name + '.isVisible = false;}));');
+            }
+            for (let i = 0; i < allQuestions.length; i++) {
+              var name = allQuestions[i];
+              eval(name + '.actionManager = new BABYLON.ActionManager(scene);');
+              eval(name + '.actionManager.registerAction(new BABYLON.ExecuteCodeAction({trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,parameter: {mesh: tempKart,usePreciseIntersection: true}},function () {' + name + '.isVisible = false;}));');
+            }
+          }
+
+        	return scene;
+        };
+        /******* End of the create scene function ******/
+
+        var scene = createScene(); //Call the createScene function
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () {
+                scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () {
+                engine.resize();
+        });
+    </script>
+
+   </body>
+
+</html>
