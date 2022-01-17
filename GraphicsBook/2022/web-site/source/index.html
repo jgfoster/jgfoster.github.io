@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -33,7 +34,7 @@ in the JavaScript programming language and display their images in HTML canvas
 elements. WebGL is based on OpenGL ES, the version of OpenGL for embedded systems, with
 a few changes to adapt it to the JavaScript language and the Web environment." title="Click for a definition of WebGL.">WebGL</span>
 are html files, which can be opened in a web browser. Many of the html programs use images.
-In certain browers, the html programs that use images will not work when the html files
+In certain browsers, the three.js and WebGL programs that use images will not work when the html files
 are loaded from a local hard drive. That is, they will fail in some web browsers when run
 from the <i>source</i> or <i>demo</i> folder in the web site download of this book.
 The programs should work OK when loaded from a web server.)</p>
@@ -176,9 +177,7 @@ objects that appear in the image." title="Click for a definition of vector graph
 examples can be opened in a web browser to see the images they produce. View the source code
 for the web page to see the program that produces the image. You can also open the files
 in a text editor to read the source. Some of the examples produce
-animated images. Old browsers can't show SVG images, but any browser that works with the rest
-of this textbook should be able to view them. (Note that Internet Explorer, at least through 
-version 11, will not show SVG animation; it will show a static image instead.)
+animated images. SVG images should work in almost all modern web browsers.
 These examples can be found in the <i>svg</i> folder inside the <i>source</i> folder.</p>
 
 
@@ -262,13 +261,14 @@ for&nbsp;C.)</p>
 <p>The OpenGL demos in the book are written using <i>glsim.js</i>, a <span class="word" data-term="JavaScript" data-definition="A programming language for web pages. JavaScript code on a web
 page is executed by a web browser that displays the page, and it can interact with the contents
 of the web page and with the user. There are JavaScript APIs for 2D and for 3D graphics" title="Click for a definition of JavaScript.">JavaScript</span>
-library that implements a small subset of the C API for OpenGL 1.1. Information about
+library that implements a small subset of the C API for OpenGL&nbsp;1.1 
+on top of WebGL&nbsp;1.0. Information about
 glsim can be found in <span class="sourceref"><a href="glsim/glsim-doc.html">glsim/glsim-doc.html</a></span>. Some of 
 the program examples are available in <span class="word" data-term="HTML" data-definition="HyperText Markup Language.  A language that is used for specifying
 the content of web pages. An HTML document is made  up of text, along with &quot;elements&quot; for adding
 other content, such as images, and for defining the structure of the document. Because of
 nesting of elements, the document can be represented by a tree-like data structure." title="Click for a definition of HTML.">HTML</span> versions that use the <i>glsim</i>
-library. They can be found in the <i>glsim</i> directory inside <i>source</i>.</p>
+library. They can be found in the <i>glsim</i> directory inside the <i>source</i> directory.</p>
 
 
 <ul>
@@ -401,9 +401,11 @@ In many browsers, it also supports the 3D graphics API, WebGL." title="Click for
 can be found in the folder named <span class="sourceref"><a href="threejs">threejs</a></span>, inside the <i>source</i> folder
 of the web site download. All of the examples use the JavaScript file
 <span class="sourceref"><a href="threejs/three.min.js">threejs/three.min.js</a></span>, which is a "minified" version of the library, not
-meant for human readers. The original version, <span class="sourceref"><a href="threejs/three.js">threejs/three.js</a></span> is
-also available. The version is <i>three.js</i> Release 89. <i>Three.js</i> is an
-open-source project. It can be downloaded from <a href="http://threejs.org">threejs.org</a>.</p>
+meant for human readers. A&nbsp;human-readable version, <span class="sourceref"><a href="threejs/three.js">threejs/three.js</a></span> is
+also available. The version is <i>three.js</i> Release 129. Note that although <i>three.js</i>
+is written using JavaScript modules, the examples in this book only use the non-modular form
+of the library. <i>Three.js</i> is an open-source project. It can be downloaded from 
+<a href="http://threejs.org">threejs.org</a>.</p>
 
 
 <ul>
@@ -430,12 +432,14 @@ From <a href="../c5/s1.html">Section&nbsp;5.1</a>
 </li>
 
 <li>
-<span class="sourceref"><a href="threejs/MeshFaceMaterial.html">threejs/MeshFaceMaterial.html</a></span> &mdash; Shows how to use a
-<span class="classname">MeshFaceMaterial</span> on a cube and on a pyramid whose geometry is constructed
-by hand as an <span class="word" data-term="indexed face set" data-definition=" (IFS). A data structure that represents a polyhedron or polygonal
+<span class="sourceref"><a href="threejs/vertex-groups.html">threejs/vertex-groups.html</a></span> &mdash; Shows how to use an
+array of materials on a cube and on a pyramid whose geometry is constructed
+by hand. This uses the "vertex group" feature of <span class="classname">THREE.BufferedGeometry</span>.
+This is also a version <span class="sourceref"><a href="threejs/vertex-groups-indexed.html">threejs/vertex-groups-indexed.html</a></span> that
+represents the pyramid using the <span class="word" data-term="indexed face set" data-definition=" (IFS). A data structure that represents a polyhedron or polygonal
 mesh. The data structure includes a numbered list of vertices and a list of faces. A face
 is specified by listing the indices of the vertices of the face; that is, a face is given as 
-a list of numbers where each number is an index into the list of vertices." title="Click for a definition of indexed face set.">indexed face set</span>.
+a list of numbers where each number is an index into the list of vertices." title="Click for a definition of indexed face set.">indexed face set</span> pattern.
 From <a href="../c5/s2.html">Section&nbsp;5.2</a>
 </li>
 
@@ -466,13 +470,10 @@ to see animated versions of two of the models.) From <a href="../c5/s2.html">Sec
 </li>
 
 <li>
-<span class="sourceref"><a href="threejs/anaglyph.html">threejs/anaglyph.html</a></span> &mdash; Uses an <span class="classname">AnaglyphEffect</span>
-to show a scene meant to be viewed with red/cyan 3D glasses. Aside from the <span class="word" data-term="anaglyph stereo" data-definition="A technique for combining stereographic images of a scene, one for the
-left eye and one for the right eye, into a single image. Typically, the image for the left eye is
-drawn using only shades of red, and the image for the right eye contains only blue and green
-color components. The 3D effect can be seen by viewing the combined image through
-red/cyan glasses, which allow each eye to see only the image that is intended for that eye." title="Click for a definition of anaglyph stereo.">anaglyph</span> effect,
-the program is a copy of <span class="sourceref"><a href="threejs/full-window.html">threejs/full-window.html</a></span>. From <a href="../c5/s3.html">Section&nbsp;5.3</a>
+<span class="sourceref"><a href="threejs/instanced-mesh.html">threejs/instanced-mesh.html</a></span> &mdash; A small example of using a
+<i>THREE.InstancedMesh</i> object, which makes it possible to draw a large numbers of
+instances of the same basic geometry, with different transformations and, optionally, different
+colors for each copy. From <a href="../c5/s3.html">Section&nbsp;5.3</a>
 </li>
 
 <li>
@@ -529,7 +530,7 @@ of the web page and with the user. There are JavaScript APIs for 2D and for 3D g
 A vertex shader must compute the vertex coordinates in the clip coordinate system.
 It can also compute other properties, such as color." title="Click for a definition of vertex shader.">vertex shader</span> and a <span class="word" data-term="fragment shader" data-definition="A shader program that will be executed once for
 each pixel in a primitive. A fragment shader must compute a color for the pixel,
-or discard it. Fragment shaders are also called pixel shaders." title="Click for a definition of fragment shader.">fragment shader</span> written in <span class="word" data-term="GLSL" data-definition="OpenGL Shader Language, the programming languauge that is used to write
+or discard it. Fragment shaders are also called pixel shaders." title="Click for a definition of fragment shader.">fragment shader</span> written in <span class="word" data-term="GLSL" data-definition="OpenGL Shader Language, the programming language that is used to write
 shader programs for use with OpenGL." title="Click for a definition of GLSL.">GLSL</span>.
 Many of these examples rely on scripts that are in the same <span class="sourceref"><a href="webgl">webgl</a></span> directory.
 In particular, the 3D examples use the <i><span class="word" data-term="glMatrix" data-definition="An open-source JavaScript library for vector and matrix math in
@@ -537,6 +538,16 @@ two and three dimensions." title="Click for a definition of glMatrix.">glMatrix<
 
 
 <ul>
+
+<li>
+<span class="sourceref"><a href="webgl/VAO-test-webgl2.html">webgl/VAO-test-webgl2.html</a></span> &mdash; Demonstrates the use of Vertex Array Objects.
+Mentioned in <a href="../c6/s1.html#webgl.1.7">Subsection&nbsp;6.1.7</a>, but it uses many techniques that will be covered later in the
+textbook. This program requires WebGL&nbsp;2.0.</li>
+
+<li>
+<span class="sourceref"><a href="webgl/instancing-test-webgl2.html">webgl/instancing-test-webgl2.html</a></span> &mdash; Demonstrates the use of instanced
+drawing with <i>gl.drawArraysInstanced</i>(). Mentioned in <a href="../c6/s1.html#webgl.1.8">Subsection&nbsp;6.1.8</a>, but it uses
+techniques that will be covered later in the textbook. This program requires WebGL&nbsp;2.0</li>
 
 <li>
 <span class="sourceref"><a href="webgl/webgl-rgb-triangle.html">webgl/webgl-rgb-triangle.html</a></span> &mdash; The standard OpenGL example rendered using WebGL:
@@ -578,6 +589,17 @@ coordinates are first mapped onto a sphere to get the direction vector that is u
 sample the cubemap. From <a href="../c6/s4.html">Section&nbsp;6.4</a>.</li>
 
 <li>
+<span class="sourceref"><a href="webgl/webgl-game-of-life.html">webgl/webgl-game-of-life.html</a></span> &mdash;
+An implementation of John H. Conway's "Game of Live" in WebGL, as a basic example of how GPUs can be used
+to perform computational tasks. From <a href="../c6/s4.html">Section&nbsp;6.4</a>.</li>
+
+<li>
+<span class="sourceref"><a href="webgl/texelFetch-MonaLisa-webgl2.html">webgl/texelFetch-MonaLisa-webgl2.html</a></span> &mdash; 
+A rather silly demo program that uses the GLSL ES 3.00 function <i>texelFetch</i>() to
+get colors from a texture image. This program requires WebGL&nbsp;2.0.
+From <a href="../c6/s4.html">Section&nbsp;6.4</a>.</li>
+
+<li>
 <span class="sourceref"><a href="webgl/simple-hierarchy2D.html">webgl/simple-hierarchy2D.html</a></span> &mdash; Demonstrates using 2D modeling transformations 
 in WebGL and GLSL, with some simple animated hierarchical objects. Transforms are implemented in
 JavaScript as objects of type <span class="classname">AffineTransform2D</span>, defined in the
@@ -617,7 +639,10 @@ is used in the lighting equation at a pixel is obtained by interpolating the
 normal vectors for the vertices. Phong shading is named after 
 Bui Tuong Phong, who developed the theory in the 1970s." title="Click for a definition of Phong shading.">Phong shading</span> (with the lighting calculations in the fragment shader). Aside from moving
 the calculation to the fragment shader, this example is identical to the previous example.
-From <a href="../c7/s2.html">Section&nbsp;7.2</a>.</li>
+From <a href="../c7/s2.html">Section&nbsp;7.2</a>. There is also a version that has been ported to
+WebGL&nbsp;2.0 and GLSL&nbsp;ES&nbsp;3.00:
+<span class="sourceref"><a href="webgl/basic-specular-lighting-Phong-webgl2.html">webgl/basic-specular-lighting-Phong-webgl2.html</a></span>. The
+required changes are minimal.</li>
 
 <li>
 <span class="sourceref"><a href="webgl/parametric-function-grapher.html">webgl/parametric-function-grapher.html</a></span> &mdash;  Lets
@@ -685,12 +710,23 @@ texture. Anisotropic filtering is available as an optional extension in WebGL." 
 lets the user turn anisotropic filtering on and off. From <a href="../c7/s5.html">Section&nbsp;7.5</a>.</li>
 
 <li>
-<span class="sourceref"><a href="webgl/image-evolver.html">webgl/image-evolver.html</a></span> &mdash; demonstrates use of the WEBGL_color_buffer_float
+<span class="sourceref"><a href="webgl/image-evolver.html">webgl/image-evolver.html</a></span> &mdash; Demonstrates use of the WEBGL_color_buffer_float
 <span class="word" data-term="WebGL extension" data-definition="An optional capability in WebGL that is not available in all
 implementations. The WebGL API has a function for checking whether a given extension is available and, 
 if so, activating it." title="Click for a definition of WebGL extension.">WebGL extension</span>. The application is a simple genetic algorithm that tries to approximate a given
-image. The floating point color buffer is used for finding the average of the color values in
-an image. From <a href="../c7/s5.html">Section&nbsp;7.5</a>.</li>
+image. The floating point color buffer is used for two computations: finding the average of the color values in
+an image and computing an image that represents the difference between two images. From <a href="../c7/s5.html">Section&nbsp;7.5</a>.</li>
+
+<li>
+<span class="sourceref"><a href="webgl/instancing-test-webgl1.html">webgl/instancing-test-webgl1.html</a></span> &mdash; Demonstrates the use of an extension
+to do instanced drawing in WebGL 1.0. This is a copy of <span class="sourceref"><a href="webgl/instancing-test-webgl2.html">webgl/instancing-test-webgl2.html</a></span>,
+modified to work with WebGL 1.0.  From <a href="../c7/s5.html">Section&nbsp;7.5</a>.</li>
+
+<li>
+<span class="sourceref"><a href="webgl/multiple-draw-buffers-webgl2.html">webgl/multiple-draw-buffers-webgl2.html</a></span> &mdash; Demonstrates drawing to multiple
+textures attached as draw buffers to the same framebuffer. Requires WebGL&nbsp;2.0 (but something
+similar could be done in WebGL 1.0 with an extension.)
+From <a href="../c7/s5.html">Section&nbsp;7.5</a>.</li>
 
 </ul>
 
@@ -705,7 +741,7 @@ an image. From <a href="../c7/s5.html">Section&nbsp;7.5</a>.</li>
 
 
 <p>This book 
-includes "live" or "interactive" demos. The
+includes "live" or "interactive" demos that are embedded in the web pages. The
 demos are small programs written as web pages using JavaScript and either
 <span class="word" data-term="HTML canvas" data-definition="A canvas element on a web page. The canvas appears as a rectangular area on the page.
 The JavaScript programming language can use a canvas element as a drawing surface. 
@@ -725,11 +761,12 @@ files on which it depends.</p>
 
 
 <p>The demos from <a href="../c2/index.html">Chapter&nbsp;2</a> use the 2D canvas graphics API,
-which will work in almost all modern web browsers, including Internet Explorer 9 or
-later. Demos from the remaining chapters use WebGL, which will work with most
-modern desktop browsers, including Internet Explorer 11 or later, and many browsers
-on mobile devices. (However, WebGL might have
-problems in some of these browsers on some machines.)</p>
+which will work in almost all modern web browsers, 
+Demos from the remaining chapters use WebGL, which will also work with almost all
+modern desktop browsers, and many browsers
+on mobile devices. (However, WebGL might still have
+problems in some of these browsers on some machines.)  All demo programs that use
+WebGL will work with WebGL&nbsp;1.0.</p>
 
 
 <p>The demos in <a href="../c3/index.html">Chapter&nbsp;3</a> and <a href="../c4/index.html">Chapter&nbsp;4</a>
@@ -739,7 +776,9 @@ glsim can be found in <span class="sourceref"><a href="glsim/glsim-doc.html">gls
 
 
 <p>For many of the demos, the reader is not expected to understand the program code for
-the demo at the point where the demo occurs in the book.</p>
+the demo at the point where the demo occurs in the book. Note that the JavaScipt code in the
+demos has <b>not</b> been updated to use the more modern version of JavaSctipt that is covered
+in <a href="../a1/s3.html">Section&nbsp;A.3</a>.</p>
 
 
 <ul>

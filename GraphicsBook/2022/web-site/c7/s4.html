@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -72,8 +73,11 @@ from the point of the view of the light source, but uses only the depth buffer f
 rendering. The depth buffer is the &quot;shadow map.&quot;   Along a given direction from the light
 source, the object that is illuminated by the light is the one that is closest to the light.
 The distance to that object is essentially encoded in the depth buffer. Objects at
-greater distance are in shadow." title="Click for a definition of shadow mapping.">shadow mapping</span> (<a href="../c5/s3.html#threejs.3.3">Subsection&nbsp;5.3.3</a>)
-use a framebuffer with a depth buffer but no color buffer.</p>
+greater distance are in shadow." title="Click for a definition of shadow mapping.">shadow mapping</span> (<a href="../c5/s3.html#threejs.3.3">Subsection&nbsp;5.3.4</a>)
+use a framebuffer with a depth buffer but no color buffer. In WebGL&nbsp;2.0, it is also
+possible to attach several color buffers to the same framebuffer, 
+which can be useful for certain advanced algorithms
+and computational applications. (Also, see <a href="../c7/s5.html#webgl3d.5.3">Subsection&nbsp;7.5.4</a>.)</p>
 
 
 <p>The rendering functions <i>gl.drawArrays</i>() and <i>gl.drawElements</i>() affect the
@@ -120,11 +124,11 @@ value is <i>true</i>.</p>
 
 <p>One example of using the depth mask is for rendering translucent geometry. When some of the
 objects in a scene are translucent, then all of the opaque objects should be rendered first,
-followed by the translucent objects. (Suppose that you rendered a translucent object, and
+followed by the translucent objects. Suppose that you rendered a translucent object, and
 then rendered an opaque object that lies behind the translucent object. The depth test
 would cause the opaque object to be hidden by the translucent object. But "translucent" means
 that the opaque object should be visible through the translucent object. So it's important
-to render all the opaque objects first.)  And it's important to turn off writing
+to render all the opaque objects first. And it's important to turn off writing
 to the depth buffer, by calling <i>gl.depthMask</i>(<i>false</i>),
 while rendering the translucent objects. The reason is that a
 translucent object that is drawn behind another translucent object should be visible
@@ -182,7 +186,7 @@ for a channel during rendering, the value of the corresponding color component i
 left eye and one for the right eye, into a single image. Typically, the image for the left eye is
 drawn using only shades of red, and the image for the right eye contains only blue and green
 color components. The 3D effect can be seen by viewing the combined image through
-red/cyan glasses, which allow each eye to see only the image that is intended for that eye." title="Click for a definition of anaglyph stereo.">anaglyph stereo</span> rendering (<a href="../c5/s3.html#threejs.3.1">Subsection&nbsp;5.3.1</a>). 
+red/cyan glasses, which allow each eye to see only the image that is intended for that eye." title="Click for a definition of anaglyph stereo.">anaglyph stereo</span> rendering (<a href="../c5/s3.html#threejs.3.1">Subsection&nbsp;5.3.2</a>). 
 An anaglyph stereo image contains two images of the scene, one intended for the left eye and one
 for the right eye. One image is drawn using only shades of red, while the other uses
 only combinations of green and blue. The two images are drawn from slightly different
@@ -318,7 +322,7 @@ yet used a non-default framebuffer. We turn to that topic now.</p>
 <p>One use for a non-default framebuffer is to render directly into a texture.
 That is, the memory occupied by a texture image can be attached to the framebuffer
 as its color buffer, so that rendering operations will send their output to
-the texture image. The technique, which is called <span class="newword" data-term="render-to-texture" data-definition="A technique in which the output of a rendering operation
+the texture image. This technique, which is called <span class="newword" data-term="render-to-texture" data-definition="A technique in which the output of a rendering operation
 is written directly to a texture. In WebGL, render-to-texture can be implemented by
 attaching the texture as one of the buffers in a framebuffer." title="Click for a definition of render-to-texture.">render-to-texture</span>,
 is used in the sample program <span class="sourceref"><a href="../source/webgl/render-to-texture.html">webgl/render-to-texture.html</a></span>.</p>
@@ -371,10 +375,11 @@ texture to the framebuffer:</p>
 
 
 <p class="noindent">The first parameter is always <i>gl.FRAMEBUFFER</i>. The second parameter
-says a color buffer is being attached. (The last character in <i>gl.COLOR_ATTACHMENT0</i>
+says a color buffer is being attached. The last character in <i>gl.COLOR_ATTACHMENT0</i>
 is a zero, which allows the possibility of having more than one color
-buffer attached to a framebuffer. In standard WebGL&nbsp;1.0, only one color buffer
-is allowed; however, see <a href="../c7/s5.html#webgl3d.5.3">Subsection&nbsp;7.5.3</a>)  The third parameter is the same texture target that was used in
+buffer attached to a framebuffer (although in standard WebGL&nbsp;1.0, only one color buffer
+is allowed).
+The third parameter is the same texture target that was used in
 <i>gl.texImage2D</i>, and the fourth is the texture object. The last parameter
 is the <span class="word" data-term="mipmap" data-definition="One of a series of reduced-size copies of a texture image, of decreasing width and height.
 Starting from the original image, each mipmap is obtained by dividing the width and height of
@@ -391,7 +396,7 @@ draw to the texture. After drawing the texture, call</p>
 <pre>gl.bindFramebuffer( gl.FRAMEBUFFER, null );</pre>
 
 
-<p class="noindent">to start drawing again to the default framebuffer. The texture is ready for use
+<p class="noindent">to start drawing again to the default framebuffer. At that point, the texture is ready for use
 in subsequent rendering operations. The texture object
 can be bound to a texture unit, and a <i>sampler2D</i> variable can be used
 in the shader program to read from the texture. You are very likely to use
@@ -399,7 +404,8 @@ different shader programs for drawing to the texture and drawing to the screen.
 Recall that the function <i>gl.useProgram</i>() is used to specify the shader program.</p>
 
 
-<p>In the sample program, the texture is animated, and a new image is drawn to the texture
+<p>In the <span class="sourceref"><a href="../source/webgl/render-to-texture.html">sample program</a></span>, 
+the texture can be animated. During the animation, a new image is drawn to the texture
 for each frame of the animation. The texture image is 2D, so the depth test is disabled
 while rendering it. This means that the framebuffer doesn't need a depth buffer.
 In outline form, the rendering function in the sample program has the form</p>
@@ -413,8 +419,9 @@ In outline form, the rendering function in the sample program has the form</p>
     gl.useProgram(prog_texture);  // shader program for the texture
     
     gl.clearColor(1,1,1,1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    
+    gl.clear(gl.COLOR_BUFFER_BIT);  // clear the texture to white
+
+    gl.enable(gl.BLEND);  // Use transparency while drawing 2D image.   
     gl.disable(gl.DEPTH_TEST); // framebuffer doesn't even have a depth buffer!
     gl.viewport(0,0,512,512);  // Viewport is not set automatically!
     
@@ -493,8 +500,8 @@ gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 512, 512);</pre>
 <p class="noindent">The first parameter to both <i>gl.bindRenderbuffer</i> and <i>gl.renderbufferStorage</i>
 must be <i>gl.RENDERBUFFER</i>. The second parameter to <i>gl.renderbufferStorage</i>
 specifies how the renderbuffer will be used. The value <i>gl.DEPTH_COMPONENT16</i>
-is for a depth buffer with 16 bits for each pixel. (Sixteen bits is the only option.)
-For a color buffer holding RGBA colors with four eight-bit values per pixel, the second parameter would be <i>gl.RGB4</i>.
+is for a depth buffer with 16 bits for each pixel. (Sixteen bits is the only option in WebGL&nbsp;1.0.)
+For a color buffer holding RGBA colors with four eight-bit values per pixel, the second parameter would be <i>gl.RGBA8</i>.
 Other values are possible, such as <i>gl.RGB565</i>, which uses 16 bits per pixel with
 5 bits for the red color channel, 6 bits for green, and 5 bits for blue. For a
 stencil buffer, the value would be <i>gl.STENCIL_INDEX8</i>.
@@ -513,7 +520,7 @@ to be used as one of the buffers in a framebuffer. It takes the form</p>
 <p class="noindent">The framebuffer must be bound by calling <i>gl.bindFramebuffer</i> before
 this function is called. The first and third parameters to <i>gl.framebufferRenderbuffer</i>
 must be as shown. The last parameter is the renderbuffer. The second paramter
-specifies how the renderbuffer will be used. It can be
+specifies how the renderbuffer will be used. It can be, for example,
 <i>gl.COLOR_ATTACHMENT0</i>, <i>gl.DEPTH_ATTACHMENT</i>, or
 <i>gl.STENCIL_ATTACHMENT</i>.</p>
 
@@ -539,7 +546,7 @@ is represented as a cubemap texture. To determine what point in the texture
 is visible at a given point on the object,
 a ray from the viewpoint is reflected from the surface point, and the reflected ray
 is intersected with the texture cube. Environment mapping is also called reflection mapping." title="Click for a definition of environment mapping.">environment map</span>
-on a reflective surface. In addition to the environment map, the programs
+on a reflective surface. In addition to the environment map, the program
 uses another cubemap texture for a <span class="word" data-term="skybox" data-definition="A large cube that surrounds a scene and is textured with images that
 form a background for that scene, in all directions." title="Click for a definition of skybox.">skybox</span>. (See
 <a href="../c6/s3.html#webgl.3.5">Subsection&nbsp;6.3.5</a>.)  Here's an image from the program:</p>
@@ -717,7 +724,8 @@ Read the source code of that function for the full details.</p>
 <p>This dynamic cubemap
 program is a nice example, since it makes use of so many of the concepts and
 techniques that we have covered. Take a minute to think about everything that is
-going on in this demo version of the sample program, and how it was all implemented:</p>
+going on in this demo version of the sample program, and how it was all implemented.
+(You might also notice that the teapot does not reflect any part of <b>itself</b>.)</p>
 <div class="demo">
 <noscript>
 <h4 style="color:red; text-align:center">Demos require JavaScript.<br>Since JavaScript is not available,<br>the demo is not functional.</h4>

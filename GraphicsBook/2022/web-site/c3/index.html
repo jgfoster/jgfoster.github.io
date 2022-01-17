@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -37,14 +38,25 @@ associated with 3D." title="Click for a definition of OpenGL.">OpenGL</span>, a 
 that was introduced in 1992 and has gone through many versions and many 
 changes since then. OpenGL is a  low-level graphics API, similar to the 2D APIs we have
 covered. It is even more primitive in some ways, but of course it is
-complicated by the fact that it supports 3D.</p>
+complicated by the fact that it supports 3D.
+OpenGL is the basis for <span class="word" data-term="WebGL" data-definition="A 3D graphics API for use on web pages. WebGL programs are written
+in the JavaScript programming language and display their images in HTML canvas
+elements. WebGL is based on OpenGL ES, the version of OpenGL for embedded systems, with
+a few changes to adapt it to the JavaScript language and the Web environment." title="Click for a definition of WebGL.">WebGL</span>, the current standard for 3D applications on the
+Web that is covered in <a href="../c6/index.html">Chapter&nbsp;6</a> and <a href="../c7/index.html">Chapter&nbsp;7</a>.
+There are many competing frameworks for
+low-level 3D graphics, including Microsoft's <span class="word" data-term="Direct3D" data-definition="Microsoft's proprietary API for 3D graphics on the Windows operating system." title="Click for a definition of Direct3D.">Direct3D</span>, 
+Apple's <span class="word" data-term="Metal" data-definition="Apple's proprietary API for 3D graphics and computation on MacOS computers and iOS devices." title="Click for a definition of Metal.">Metal</span>, and <span class="word" data-term="Vulkan" data-definition="An open-source cross-platform API for 3D graphics and computation, designed as a
+more modern and efficient replacement for OpenGL." title="Click for a definition of Vulkan.">Vulkan</span>, which
+was designed by the creators of OpenGL as a more modern and efficient replacement.
+</p>
 
 
 <p>For the next two chapters, the discussion is
 limited to OpenGL&nbsp;1.1. OpenGL 1.1 is a large API, and we will 
 only cover a part of it. The goal is to introduce 3D graphics concepts, 
 not to fully cover the API. A significant part of what we cover here
-has been removed from the most modern versions of OpenGL. However,
+has been removed from the most modern versions of OpenGL, including WebGL. However,
 modern OpenGL in its pure form has a very steep initial learning curve,
 and it is really not a good starting place for someone who is encountering
 3D graphics for the first time. Some additional support is needed&mdash;if not OpenGL 1.1

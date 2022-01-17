@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -62,7 +63,8 @@ we will just use coordinates that lie between -1 and&nbsp;1.</p>
 
 <p>A note about programming: OpenGL can be implemented in many different programming
 languages, but the API specification more or less assumes that
-the language is&nbsp;C. For the most part, the C specification
+the language is&nbsp;C. (See <a href="../a1/s2.html">Section&nbsp;A.2</a> for a short introduction to&nbsp;C.)
+For the most part, the C specification
 translates directly into other languages. The main differences
 are due to the special characteristics of arrays in the C language.
 My examples will follow the C syntax, with a few notes about how
@@ -75,8 +77,8 @@ actual programming. The live OpenGL 1.1 demos for
 this book are written using a <span class="word" data-term="JavaScript" data-definition="A programming language for web pages. JavaScript code on a web
 page is executed by a web browser that displays the page, and it can interact with the contents
 of the web page and with the user. There are JavaScript APIs for 2D and for 3D graphics" title="Click for a definition of JavaScript.">JavaScript</span> simulator that implements
-a subset of OpenGL 1.1. That simulator is also discussed in
-<a href="../c3/s6.html">Section&nbsp;3.6</a>.</p>
+a subset of OpenGL 1.1. That simulator is discussed in
+<a href="../c3/s6.html#gl1geom.6.3">Subsection&nbsp;3.6.3</a>.</p>
 
 
 <div class="subsection">
@@ -111,10 +113,15 @@ glEnd();</pre>
 <i>glVertex2f</i>. Vertices must be specified between calls to <i>glBegin</i>
 and <i>glEnd</i>. The parameter to <i>glBegin</i> tells which type of primitive
 is being drawn. The <i>GL_TRIANGLES</i> primitive allows you to draw more than
-one triangle: Just specify three vertices for each triangle that you want to draw.</p>
+one triangle: Just specify three vertices for each triangle that you want to draw.
+Note that using <i>glBegin/glEnd</i> is not the preferred way to specify primitives,
+even in OpenGL&nbsp;1.1. However, the alternative, which is covered in
+<a href="../c3/s4.html#gl1geom.4.2">Subsection&nbsp;3.4.2</a>, is more complicated to use. You should consider
+<i>glBegin/glEnd</i> to be a convenient way to learn about vertices and their properties,
+but not the way that you will actually do things in modern graphics APIs.</p>
 
 
-<p>(I should note that these functions actually just send commands to the <span class="word" data-term="GPU" data-definition="Graphics Processing Unit, a computer hardware component that performs graphical
+<p>(I should note that OpenGL functions actually just send commands to the <span class="word" data-term="GPU" data-definition="Graphics Processing Unit, a computer hardware component that performs graphical
 computations that create and manipulate images. Operations such as drawing a line on the screen 
 or rendering a 3D image are done in the GPU, which is optimized to perform such operations very
 quickly." title="Click for a definition of GPU.">GPU</span>. OpenGL

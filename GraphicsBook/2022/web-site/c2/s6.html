@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -88,7 +89,7 @@ In the source code of a web page, a canvas element is created with code of the f
 
 <p>To draw on a canvas, you need a graphics context. A graphics context is an object that
 contains functions for drawing shapes. It also contains variables that record the current graphics 
-state, including  things like the current drawing color, transform, and font. Here, we will 
+state, including things like the current drawing color, transform, and font. Here, we will 
 generally use <i>graphics</i> as the name of the variable that refers to the graphics context, 
 but the variable name is, of course, up to the programmer. This graphics context plays the same role in 
 the canvas API that a variable of type <span class="classname">Graphics2D</span> plays in Java.
@@ -153,7 +154,7 @@ a very minimal web page that uses canvas graphics:
 &lt;/html&gt;</pre>
 
 
-<p class="noindent">For a more complete, though still minimal, example, look at the sample page
+<p class="noindent">For a more complete, though still minimal, example, you can look at the sample page
 <span class="sourceref"><a href="../source/canvas2d/GraphicsStarter.html">canvas2d/GraphicsStarter.html</a></span>. (You should look at the page
 in a browser, but you should also read the source code.)  This example shows
 how to draw some basic shapes using canvas graphics, and you can use it as
@@ -181,7 +182,7 @@ and mouse events.</p>
 <p>The default coordinate system on a canvas is the usual: The unit of measure is one pixel;
 (0,0) is at the upper left corner; the <i>x</i>-coordinate increases to the right;
 and the <i>y</i>-coordinate increases downward.  The range of <i>x</i> and <i>y</i>
-values are given by the <i>width</i> and <i>height</i> properties of the <span class="tag">&lt;canvas&gt;</span>
+values is given by the <i>width</i> and <i>height</i> properties of the <span class="tag">&lt;canvas&gt;</span>
 element. The term "pixel" here for the unit of measure is not really correct. 
 Probably, we should say something like "one nominal pixel."
 The unit of measure is one pixel at typical desktop resolution with no magnification.
@@ -599,8 +600,8 @@ procedurally or as a data structure. It's pretty much the same as in Java.
 In fact, you should see that the basic concepts that you learned about
 transformations and modeling carry over to the canvas graphics API. Those
 concepts apply very widely and even carry over to 3D graphics APIs, with
-just a little added complexity. The demo program
-<span class="sourceref"><a href="../demos/c2/cart-and-windmills.html">c2/cart-and-windmills.html</a></span> from <a href="../c2/s4.html">Section&nbsp;2.4</a>
+just a little added complexity. The sample web page
+<span class="sourceref"><a href="../source/canvas2d/HierarchicalModel2D.html">canvas2d/HierarchicalModel2D.html</a></span>
 implements hierarchical modeling using the 2D canvas API.</p>
 
 
@@ -801,7 +802,7 @@ all be zero. The array is a value of type <i>Uint8ClampedArray</i> whose element
 <span class="newword" data-term="typed array" data-definition="In JavaScript, an array type that is limited to holding numerical values
 of a single type. For example, the type Float32Array represents arrays that can hold 32-bit floating
 point values, and Uint8Array arrays can hold only 8-bit integer values. Such arrays are more efficient
-than general JavaScript arrays for numerical calculations. They were introduced into JavaScript
+than general JavaScript arrays for numerical calculations. The were introduced into JavaScript
 along with HTML canvas graphics and WebGL." title="Click for a definition of typed array.">typed array</span> datatypes, which can only hold values of a specific numerical type.
 As an example, suppose that you just want to read the RGB color of one pixel, at coordinates (<i>x,y</i>).
 You can set</p>
@@ -848,7 +849,7 @@ Here is the function that we call to do this:</p>
 <p class="noindent">The floating point array, <i>smudgeColorArray</i>, will be used for computing new
 color values for the image as the mouse moves. The color values
 from this array will be copied into the image data object, <i>smudgeImageData</i>, 
-which will them be used to put the color values into the image. This is done in
+which will then be used to put the color values into the image. This is done in
 another function, which is called for each point that is visited as the user
 drags the Smudge tool over the canvas:</p>
 

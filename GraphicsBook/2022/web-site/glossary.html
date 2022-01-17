@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -60,7 +61,8 @@ Ambient light illuminates all objects in a scene equally.</span>
             <span class="glossary_definition">A rendering technique that takes into account the fact that ambient light
 will illuminate different surfaces to varying extents, depending on the degree to which ambient light is blocked,
 or "occluded," from reaching each surface by other geometry in the scene. 
-Ambient occlusion is an improvement on basic ambient lighting, but it is not an actual physical phenomenon.</span>
+Ambient occlusion is an improvement on basic ambient lighting, but, like ambient light itself,
+it is not an actual physical phenomenon.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">anaglyph stereo.</span>&nbsp;
@@ -166,7 +168,7 @@ be implemented very efficiently in computer hardware</span>
 idea of "material" in 3D graphics. A BSDF gives the probability that a light ray that arrives
 at point of space from one direction will leave that point heading in a another direction.
 The probability is a function of the two directions, the point, and the wavelength of the light.
-Once kind of scattering is reflection of light from a surface. For that case, the term
+One kind of scattering is reflection of light from a surface. For that case, the term
 BRDF (Bidirectional Reflectance Distribution Function) is used.</span>
 </p>
 <p class="glossary_item">
@@ -228,8 +230,7 @@ matrices in OpenGL and GLSL.</span>
 <span class="glossary_term">constructor.</span>&nbsp;
             <span class="glossary_definition">In object-oriented programming, a subroutine that is used to create
 objects. A constructor for a class creates and initializes objects belonging to that
-class. (JavaScript, which does not have classes as such, does have constructors, so that
-a constructor in effect defines a class.)</span>
+class.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">control point.</span>&nbsp;
@@ -320,6 +321,10 @@ so that diffuse illumination of a surface is visible to all viewers, independent
 viewer's position.</span>
 </p>
 <p class="glossary_item">
+<span class="glossary_term">Direct3D.</span>&nbsp;
+            <span class="glossary_definition">Microsoft's proprietary API for 3D graphics on the Windows operating system.</span>
+</p>
+<p class="glossary_item">
 <span class="glossary_term">directed acyclic graph.</span>&nbsp;
             <span class="glossary_definition"> Also called a "dag." A linked data structure in which there are no cycles.
 That is, it is not possible to find a sequence of nodes where each node links to the next and
@@ -330,6 +335,11 @@ the last node links back to the first.</span>
             <span class="glossary_definition">A light source whose light rays are parallel, all arriving from
 the same direction. Can be considered to be a light source at an effectively infinite distance.
 Also called a "sun," since the Sun is an example of a directional light source.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">displacement mapping.</span>&nbsp;
+            <span class="glossary_definition">A technique used to modify a polygonal mesh by
+moving, or displacing, the vertices of the mesh.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">display list.</span>&nbsp;
@@ -386,6 +396,11 @@ is represented as a cubemap texture. To determine what point in the texture
 is visible at a given point on the object,
 a ray from the viewpoint is reflected from the surface point, and the reflected ray
 is intersected with the texture cube. Environment mapping is also called reflection mapping.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">ES6.</span>&nbsp;
+            <span class="glossary_definition">A version of JavaScript implemented by almost all modern web browsers. More formally
+known as ECMAScript&nbsp;6 or ECMAScript&nbsp;2015. ES6 introduced a large number of new features.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">Euclidean transform.</span>&nbsp;
@@ -500,9 +515,21 @@ independent of any light source. Total ambient light is the sum of the global am
 the ambient light intensity of each enabled light source.</span>
 </p>
 <p class="glossary_item">
+<span class="glossary_term">global illumination.</span>&nbsp;
+            <span class="glossary_definition">The goal of 3D rendering algorithms that take into account all the interactions
+of light in a scene, including indirect illumination by light that bounces off other objects.</span>
+</p>
+<p class="glossary_item">
 <span class="glossary_term">GLSL.</span>&nbsp;
-            <span class="glossary_definition">OpenGL Shader Language, the programming languauge that is used to write
+            <span class="glossary_definition">OpenGL Shader Language, the programming language that is used to write
 shader programs for use with OpenGL.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">GLTF.</span>&nbsp;
+            <span class="glossary_definition">GL Transfer Format. A file format for 3D models. A GLTF file can
+contain complete 3D scenes, including objects, materials, lights, and even animations.
+The GLTF specification comes from the Khronos Group, which is also responsible for
+OpenGL, WebGL, and Vulkan.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">GLU.</span>&nbsp;
@@ -546,6 +573,18 @@ Grayscale is also called "monochrome."</span>
             <span class="glossary_definition">(Graphical User Interface.) A user interface for a program where the user
 interacts with the program using components such as windows, menus, buttons, and
 text-input boxes.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">HDR image.</span>&nbsp;
+            <span class="glossary_definition">A high dynamic range image. An HDR image has more color information
+than the usual eight bits per color channel per pixel. This makes it more suitable to
+uses that require calculation with the color values.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">height map.</span>&nbsp;
+            <span class="glossary_definition">An image in which the grayscale value represents a height,
+or elevation. Height maps can be used in displacement mapping to specify the
+amount of displacement.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">hidden surface problem.</span>&nbsp;
@@ -632,6 +671,12 @@ giving its position, or index, in the list of colors.</span>
 mesh. The data structure includes a numbered list of vertices and a list of faces. A face
 is specified by listing the indices of the vertices of the face; that is, a face is given as 
 a list of numbers where each number is an index into the list of vertices.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">instanced drawing.</span>&nbsp;
+            <span class="glossary_definition">In WebGL 2.0, the ability to draw multiple versions of a primitive
+with a single function call. Each copy can have its own values for certain attributes, such as
+color or transformation.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">intensity of a light source.</span>&nbsp;
@@ -791,6 +836,10 @@ mode is set with the function glMatrixMode. Possible values include GL_MODELVIEW
 and GL_TEXTURE.</span>
 </p>
 <p class="glossary_item">
+<span class="glossary_term">Metal.</span>&nbsp;
+            <span class="glossary_definition">Apple's proprietary API for 3D graphics and computation on MacOS computers and iOS devices.</span>
+</p>
+<p class="glossary_item">
 <span class="glossary_term">minification filter.</span>&nbsp;
             <span class="glossary_definition">An operation that is used when applying a texture to an object,
 when the texture has to be shrunk to fit the object. For an image texture, a minification filter
@@ -914,7 +963,8 @@ can be repeated horizontally and vertically as necessary to cover the shape.</sp
 <span class="glossary_term">PBR.</span>&nbsp;
             <span class="glossary_definition">Physically Based Rendering. A general term encompassing a variety of techniques
 for rendering materials that look more physically realistic than the materials traditionally used
-in OpenGL and similar graphics APIs. PBR has recently become common in real-time graphics such
+in OpenGL and similar graphics APIs. The idea is to implement the actual physics of light
+and material more directly. PBR has become common in real-time graphics such
 as video games.</span>
 </p>
 <p class="glossary_item">
@@ -1423,7 +1473,7 @@ direction.)</span>
             <span class="glossary_definition">In JavaScript, an array type that is limited to holding numerical values
 of a single type. For example, the type Float32Array represents arrays that can hold 32-bit floating
 point values, and Uint8Array arrays can hold only 8-bit integer values. Such arrays are more efficient
-than general JavaScript arrays for numerical calculations. They were introduced into JavaScript
+than general JavaScript arrays for numerical calculations. The were introduced into JavaScript
 along with HTML canvas graphics and WebGL.</span>
 </p>
 <p class="glossary_item">
@@ -1456,6 +1506,12 @@ values in the range from 0 to 255.</span>
 <span class="glossary_term">URL.</span>&nbsp;
             <span class="glossary_definition">Uniform Resource Locator. An address of some resource on the World Wide Web.
 For example, "http://math.hws.edu/grahicsbook".</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">VAO.</span>&nbsp;
+            <span class="glossary_definition">Vertex Array Object. In WebGL 2.0, a region of memory, typically on the graphics card,
+that holds a collection of attribute settings such as enabled state and values of vertex attribute pointers.
+All of the settings can then be selected simply by binding the VAO.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">varying variable.</span>&nbsp;
@@ -1547,6 +1603,11 @@ is the rectangle in the xy-plane that contains the portion of the plane that wil
 in the image. (The corresponding term in 3D graphics is "view volume.")</span>
 </p>
 <p class="glossary_item">
+<span class="glossary_term">Vulkan.</span>&nbsp;
+            <span class="glossary_definition">An open-source cross-platform API for 3D graphics and computation, designed as a
+more modern and efficient replacement for OpenGL.</span>
+</p>
+<p class="glossary_item">
 <span class="glossary_term">WebGL.</span>&nbsp;
             <span class="glossary_definition">A 3D graphics API for use on web pages. WebGL programs are written
 in the JavaScript programming language and display their images in HTML canvas
@@ -1558,6 +1619,11 @@ a few changes to adapt it to the JavaScript language and the Web environment.</s
             <span class="glossary_definition">An optional capability in WebGL that is not available in all
 implementations. The WebGL API has a function for checking whether a given extension is available and, 
 if so, activating it.</span>
+</p>
+<p class="glossary_item">
+<span class="glossary_term">WebGPU.</span>&nbsp;
+            <span class="glossary_definition">A JavaScript API under development that is designed to let web programs access
+GPU computational capabilities as well as graphics.</span>
 </p>
 <p class="glossary_item">
 <span class="glossary_term">winding number.</span>&nbsp;

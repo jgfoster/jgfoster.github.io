@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -49,7 +50,8 @@ more efficient way to draw OpenGL primitives.</p>
 <p>OpenGL can only directly render points, lines, and polygons. 
 (In fact, in modern OpenGL, the only polygons that are used are triangles.)
 A <span class="newword" data-term="polyhedron" data-definition="A closed 3D figure whose faces, or sides, are polygons. Usually, it is
-assumed that the faces of a polyhedron do not intersect, except along their edges." title="Click for a definition of polyhedron.">polyhedron</span> can be represented exactly, since a polyhedron
+assumed that the faces of a polyhedron do not intersect, except along their edges." title="Click for a definition of polyhedron.">polyhedron</span>, the 3D analog of a polygon,  
+can be represented exactly, since a polyhedron
 has faces that are polygons. On the other hand, if only polygons are available, then 
 a curved surface, such as the surface of a sphere, can only be approximated.
 A polyhedron can be represented, or a curved surface can be approximated,
@@ -153,7 +155,7 @@ it is often convenient to consider one of those faces to be the
 "front face" of the polygon and one to be the "back face."
 For a polyhedron like the house, the front face is the one that faces
 the outside of the polyhedron. The usual rule is that the
-vertices of a polygon should be listed in counter-clockwise order
+vertices of a polygon should be listed in counterclockwise order
 when looking at the front face of the polygon. When looking at the
 back face, the vertices will be listed in clockwise order. This is
 the default rule used by OpenGL.</p>  
@@ -324,7 +326,7 @@ program is <span class="sourceref"><a href="../source/jogl/IFSPolyhedronViewer.j
 <span class="sourceref"><a href="../source/glut/ifs-polyhedron-viewer.c">glut/ifs-polyhedron-viewer.c</a></span>. To get at the menu in the C version,
 right-click on the display. The data for the polyhedra are
 created in <span class="sourceref"><a href="../source/jogl/Polyhedron.java">jogl/Polyhedron.java</a></span> and 
-<span class="sourceref"><a href="../source/glut/polyhedron.c">glut/polyhedron.c</a></span>. And here is live demo version of the program
+<span class="sourceref"><a href="../source/glut/polyhedron.c">glut/polyhedron.c</a></span>. And here is a live demo version of the program
 for you to try:</p>
 
 <div class="demo">
@@ -355,7 +357,11 @@ but the set of available primitives depends on the graphics system. (Note that a
 is used in OpenGL, a single primitive can be made up of many points, line segments, or triangles.)" title="Click for a definition of geometric primitive.">primitive</span> 
 using functions such as <i>glVertex2d</i> and <i>glColor3fv</i> with
 <i>glBegin/glEnd</i>. To address this issue, OpenGL&nbsp;1.1 introduced the
-functions <i>glDrawArrays</i> and <i>glDrawElements</i>. We will look at <i>glDrawArrays</i>
+functions <i>glDrawArrays</i> and <i>glDrawElements</i>. These functions are still
+used in modern OpenGL, including <span class="word" data-term="WebGL" data-definition="A 3D graphics API for use on web pages. WebGL programs are written
+in the JavaScript programming language and display their images in HTML canvas
+elements. WebGL is based on OpenGL ES, the version of OpenGL for embedded systems, with
+a few changes to adapt it to the JavaScript language and the Web environment." title="Click for a definition of WebGL.">WebGL</span>. We will look at <i>glDrawArrays</i>
 first. There are some differences between the C and the Java versions of the API.
 We consider the C version first and will deal with the changes necessary for the
 Java version in the next subsection.</p>
@@ -388,9 +394,8 @@ calling</p>
 (You have to provide the same number of coordinates
 for each vertex.)   The <i>type</i> is a constant that tells the data
 type of each of the numbers in the array. The possible values are
-<i>GL_FLOAT</i>, <i>GL_INT</i>, and <i>GL_DOUBLE</i>. This parameter is
-necessary because the array can contain different types of data.
-The constant that you provide here must match the type of the array.
+<i>GL_FLOAT</i>, <i>GL_INT</i>, and <i>GL_DOUBLE</i>. 
+The constant that you provide here must match the data type of the numbers in the array.
 The <i>stride</i> is usually 0, meaning that the data
 values are stored in consecutive locations in the array; if that is
 not the case, then <i>stride</i> gives the distance <b>in bytes</b> between
@@ -429,7 +434,7 @@ The <i>primitiveType</i> tells which primitive type is being drawn,
 such as <i>GL_QUADS</i> or <i>GL_TRIANGLE_STRIP</i>.
 The same ten primitive types that can be used with <i>glBegin</i> can
 be used here. The parameter <i>firstVertex</i> is the number of the first
-vertex that is to used for drawing the primitive. Note that the position
+vertex that is to be used for drawing the primitive. Note that the position
 is given in terms of vertex number; the corresponding array index would
 be the vertex number times the number of coordinates per vertex, which
 was set in the call to <i>glVertexPointer</i>.
@@ -509,7 +514,7 @@ integers, but arrays of regular positive integers will also work.)  You also nee
 arrays to store the vertex coordinates and other vertex data, and you must enable 
 those arrays in the same way as for <i>glDrawArrays</i>, using functions such as
 <i>glVertexArray</i> and <i>glEnableClientState</i>. To actually draw the primitive,
-call the functions</p>
+call the function</p>
 
 
 

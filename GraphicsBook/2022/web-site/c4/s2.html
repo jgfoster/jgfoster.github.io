@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -41,7 +42,17 @@
 
 
 <p class="firstpar">In this section, we will see how to use light and material in OpenGL.
-The use of light and material must be enabled by calling
+The functions that are discussed in this section are specific to
+older versions of OpenGL, and will not carry over directly to
+other graphics <span class="word" data-term="API" data-definition="Application Programming Interface. A collection of related classes, functions,
+constants, etc., for performing some task. An API is an &quot;interface&quot; in the sense that it
+can be used without understanding how its functionality is actually implemented." title="Click for a definition of API.">APIs</span>. (But the general
+ideas that they implement, which were covered in the
+<a href="../c4/s1.html">previous section</a>
+are more generally applicable.)</p>
+
+
+<p>In OpenGL 1.1, the use of light and material must be enabled by calling
 <i>glEnable</i>(<i>GL_LIGHTING</i>). When lighting is disabled,
 the color of a vertex is simply the current color as set by
 <i>glColor*</i>. When lighting is enabled, the color of a vertex
@@ -68,8 +79,8 @@ to be lit while another part <i>of the same primitive</i> is unlit.
 when lighting is enabled, it is applied to point and line primitives 
 as well as to polygons, even though it rarely makes sense to do so.)  Lighting
 can be enabled and disabled by calling <i>glEnable</i>
-and <i>glDisable</i> with parameter <i>GL_LIGHTING</i>. Light and
-material settings don't have to be changed when lighting is turned off, 
+and <i>glDisable</i> with parameter <i>GL_LIGHTING</i>. Other light and
+material settings don't have to be modified when lighting is turned off, 
 since they are simply ignored when lighting is disabled. </p>
 
 
@@ -150,7 +161,7 @@ front face, the back face, or both. The second parameter tells which material pr
 is being set. It can be <i>GL_AMBIENT</i>, <i>GL_DIFFUSE</i>, <i>GL_SPECULAR</i>,
 <i>GL_EMISSION</i>, or <i>GL_AMBIENT_AND_DIFFUSE</i>. Note that it is possible to
 set the ambient and diffuse colors to the same value with one call to <i>glMaterialfv</i>
-by using <i>GL_AMBIENT_AND_DIFFUSE</i> as the property name.
+by using <i>GL_AMBIENT_AND_DIFFUSE</i> as the property name; this is the most common case.
 The last parameter to <i>glMaterialfv</i> is an array containing four <span class="ptype">float</span> numbers. The 
 numbers give the <span class="word" data-term="RGBA color" data-definition="An RGB color&mdash;specified by red, green, and blue component values&mdash;together
 with an alpha component. The alpha component is most often take to specify the degree of transparency
@@ -497,7 +508,8 @@ will not be unit normals after a scaling transformation. However, if you have en
 <i>GL_NORMALIZE</i>, the transformed normals will automatically be converted back to unit
 normals. My recommendation is to <b>always</b> enable <i>GL_NORMALIZE</i> as part of
 your OpenGL initialization. The only exception would be if all of the normal vectors
-that you provide are of length one and you do not apply any scaling transformations.</p>
+that you provide are of length one and you do not apply any scaling transformations.
+(Translations and rotations are OK, because they do not modify lengths.)</p>
 
 
 
@@ -587,7 +599,7 @@ can be considered to be a point at infinity in the direction of
 
 <p>On the other hand, if the fourth
 number, <i>w</i>, is non-zero, then the light is a point light, and it is located
-at the point (<i>x/w,y/w,z/w</i>). Usually, <i>w</i> is&nbsp;1. The
+at the point (<i>x/w,&nbsp;y/w,&nbsp;z/w</i>). Usually, <i>w</i> is&nbsp;1. The
 value (<i>x,y,z,</i>1) gives a point light at (<i>x,y,z</i>).
 Again, this is really homogeneous coordinates.</p>
 
@@ -815,7 +827,7 @@ out of the screen, which is true for an <span class="word" data-term="orthograph
 z-coordinate. It projects objects along lines that are orthogonal (perpendicular) to the
 xy-plane. In OpenGL 1.1, the view volume for an orthographic projection is a
 rectangular solid." title="Click for a definition of orthographic projection.">orthographic projection</span> but
-is not for not accurate for a <span class="word" data-term="perspective projection" data-definition="A projection from 3D to 2D that projects objects along
+is not accurate for a <span class="word" data-term="perspective projection" data-definition="A projection from 3D to 2D that projects objects along
 lines radiating out from a viewpoint. A perspective projection attempts to simulate 
 realistic viewing. A perspective projection preserves perspective;
 that is, objects that are farther from the viewpoint are smaller in the projection.

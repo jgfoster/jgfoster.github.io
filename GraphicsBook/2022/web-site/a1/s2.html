@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -49,13 +50,14 @@ this book, to really master C, you need to know something about its less familia
 parts.</p>
 
 
-<p>My own experience with C is limited to using it on Linux, where I can use
+<p>My own experience with C is mostly limited to using it on Linux, where I can use
 the <i>gcc</i> command to compile C programs. If you want to use <i>gcc</i> on Windows,
-you might consider MinGW (<a href="http://mingw.org/">http://mingw.org/</a>)
-or Cygwin (<a href="https://cygwin.com/">https://cygwin.com/</a>). I don't have
-experience with either of these&mdash;in fact, I have almost no experience with
-Windows. For Mac&nbsp;OS, you can write C programs using Apple's XCode development system.
-It is also possible to install a command line C compiler on Mac&nbsp;OS.</p>
+you might consider installing the Linux Subsystem for Windows 
+(<a href="https://docs.microsoft.com/en-us/windows/wsl/">https://docs.microsoft.com/en-us/windows/wsl/</a>)
+or Cygwin (<a href="https://cygwin.com/">https://cygwin.com/</a>). 
+For Mac&nbsp;OS, you can write C programs using Apple's XCode development tools.
+Using Cygwin or XCode tools for OpenGL programming is briefly covered in
+<a href="../c3/s6.html#gl1geom.6.1">Subsection&nbsp;3.6.1</a>. </p>
 
 
 
@@ -90,7 +92,8 @@ indicates success, and any other value indicates that an error occurred.</p>
 <p>C makes a distinction between "defining" a variable or function and
 "declaring" it. A&nbsp;variable or function can have only one definition, but it
 can be declared any number of times. A variable or function should be <b>declared</b> before
-it is used, but does not have to be <b>defined</b> before it is used. A&nbsp;C&nbsp;compiler
+it is used, but does not have to be <b>defined</b> before it is used. Any definition is
+also a declaration. A&nbsp;C&nbsp;compiler
 will not look ahead to search for a declaration. (More precisely, if it encounters
 an undeclared variable, it will assume that it is of type <span class="ptype">int</span>,
 and if it encounters an undeclared function, it will try to deduce a declaration.
@@ -162,7 +165,8 @@ you will usually write a matching .h file containing declarations of those funct
 be "linked" together into a complete program. The <i>gcc</i> compiler does the
 linking automatically by default. Even if all of the files have compiled successfully,
 there can still be link errors. A link error occurs if no definition is found for
-a variable or function that has been declared, or if two definitions are found for the same thing. 
+a variable or function that has been declared, or if two definitions for the same thing
+are found in different files.
 For functions defined in standard
 libraries, you might need to link the program with the appropriate libraries using the
 "-l" option on the <i>gcc</i> compiler. For example, a program that uses functions
@@ -209,8 +213,9 @@ but integers can be used as booleans, with 0 representing <i>false</i> and any
 non-zero value representing <i>true</i>.
 There is no "byte" data type, but <span class="ptype">char</span> is essentially an 8-bit integer type
 that can be used in place of <span class="ptype">byte</span>. 
-There are no guarantees about the number of bits used for the other numerical data types.
-The integer types, including <span class="ptype">char</span> can 
+There are no guarantees about the number of bits used for the other numerical data types,
+but usually <span class="ptype">int</span> means 32-bit integers and <span class="ptype">long</span> means 64-bit.
+The integer types, including <span class="ptype">char</span>, can 
 be marked "signed" or "unsigned", where the unsigned types have
 only positive values. For example, <i>signed&nbsp;char</i> has values in the range
 &minus;128 to 127, while <i>unsigned&nbsp;char</i> has values in the range 0 to 255.
@@ -504,7 +509,7 @@ type, so that a variable can be declared as</p>
 <pre>color bg;</pre>
 
 
-<p>It is sometimes useful to work with pointers to structs. For example, we can make a pointer
+<p class="noindent">It is sometimes useful to work with pointers to structs. For example, we can make a pointer
 to the struct <i>bg</i>:</p>
 
 

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -29,9 +30,7 @@ That is, the content of an image is specified as a list of geometric objects.
 The technique is referred to as <span class="newword" data-term="geometric modeling" data-definition="Creating a scene by specifying the geometric objects contained
 in the scene, together with geometric transforms to be applied to them and attributes that
 determine their appearance." title="Click for a definition of geometric modeling.">geometric modeling</span>. The starting point
-is to construct an "artificial 3D <span class="newword" data-term="world" data-definition="An imaginary three-dimensional (3D) space (with coordinates) into which a 
-collection of simple geometric shapes can be placed." title="Click for a definition of world.">world</span>" as a collection 
-of simple geometric shapes, arranged in
+is to construct an "artificial 3D world" as a collection of simple geometric shapes, arranged in
 three-dimensional space. The objects can have <span class="word" data-term="attribute" data-definition="A property, such as color, of a graphical object. An image can be specified
 by the geometric shapes that it contains, together with their attributes." title="Click for a definition of attribute.">attributes</span> that, combined with
 global properties of the world, determine the appearance of the objects.
@@ -57,10 +56,7 @@ usually referred to as the <i>x</i>, <i>y</i>, and <i>z</i> coordinates of the p
 This coordinate system is referred to as "world coordinates."</p>
 
 
-<p>We want to build a <span class="newword" data-term="scene" data-definition="A static collection of simple, textured, geometric shapes 
-placed in specific locations in a world, iluminated with lighting, that is rendered as a view from a 
-particular perspective. Multiple scenes with minor changes can be sequenced quickly to make an animation." title="Click for a definition of scene.">scene</span> inside the world, made up of geometric objects. 
-For example, 
+<p>We want to build a scene inside the world, made up of geometric objects. For example, 
 we can specify a line segment in the scene by giving the coordinates of its two endpoints, 
 and we can specify a triangle by giving the coordinates of its three vertices. The smallest building
 blocks that we have to work with, such as line segments and triangles, are called
@@ -143,7 +139,7 @@ is image texture. When an image texture is applied to a surface, the surface col
 point to point." title="Click for a definition of texture.">texture</span>.
 In most general terms, a texture is a way of varying material properties from point-to-point
 on a surface. The most common use of texture is to allow different colors for different
-points. This is done by using a 2D image as a texture, which can be applied to a surface
+points. This is often done by using a 2D image as a texture. The image can be applied to a surface
 so that the image looks like it is "painted" onto the surface.
 However, texture can also refer to changing values for things like transparency or
 "bumpiness."  Textures allow us to add detail to a scene without using a huge number of

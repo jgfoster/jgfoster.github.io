@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -57,7 +58,7 @@ other advanced graphics techniques.</p>
 
 
 <p>We have already seen ray casting used by objects of type <span class="classname">THREE.RayCaster</span> in the
-<i>three.js</i> API (<a href="../c5/s3.html#threejs.3.2">Subsection&nbsp;5.3.2</a>). A <span class="classname">Raycaster</span> takes an initial
+<i>three.js</i> API (<a href="../c5/s3.html#threejs.3.2">Subsection&nbsp;5.3.3</a>). A <span class="classname">Raycaster</span> takes an initial
 point and a direction, given as a <span class="word" data-term="vector" data-definition="An element of a vector space. Elements of a vector space can
 be added and can be multiplied by constants. For computer graphics, a vector is
 just a list or array containing two, three, or four numbers. Vectors in that sense are often
@@ -115,7 +116,13 @@ determine whether the surface point lies in the shadow of another object.</p>
 
 <p>With all this information, we can color point B in the image
 using the same lighting equation that is used in OpenGL (<a href="../c4/s1.html#gl1light.1.4">Subsection&nbsp;4.1.4</a>).
-And, as a bonus, we get shadows, which are hard to do in OpenGL!</p>
+Ray casting solves the <span class="word" data-term="hidden surface problem" data-definition="The problem in 3D graphics of deciding which object is
+visible at each pixel in an image. When one object is behind another object from the point
+of view of the viewer, only the front object should appear in the image. A rendering
+algorithm for 3D graphics must satisfy this constraint. Algorithms that solve the hidden
+surface problem include the painter's algorithm and the depth test algorithm." title="Click for a definition of hidden surface problem.">hidden surface problem</span> with no need for
+a <span class="word" data-term="depth buffer" data-definition="A region of memory that stores the information needed for the depth test
+in 3D graphics, that is, a depth value for each pixel in the image. Also called the &quot;z-buffer.&quot;" title="Click for a definition of depth buffer.">depth buffer</span>. And, as a bonus, we get shadows, which are hard to do in OpenGL!</p>
 
 
 <p>(If the ray from the
@@ -266,7 +273,7 @@ and determine the first intersection point of the ray with an object. The color 
 is computed by adding up the contributions from different sources.</p>
 
 
-<p>First, there are diffuse, specular, and possibly ambient reflection of light from various light sources. These
+<p>First, there is diffuse, specular, and possibly ambient reflection of light from various light sources. These
 contributions are based on the diffuse, specular, and ambient colors of the object, on the normal vector
 to the object, and on the properties of the light sources. Note that some color properties of the object,
 usually the ambient and diffuse colors, might come from a texture. The specular contribution can produce
@@ -369,7 +376,8 @@ reflected and re-reflected many times. Ambient light is assumed to illuminate ev
 However, that is a poor approximation. A better approximation uses <span class="newword" data-term="ambient occlusion" data-definition="A rendering technique that takes into account the fact that ambient light
 will illuminate different surfaces to varying extents, depending on the degree to which ambient light is blocked,
 or &quot;occluded,&quot; from reaching each surface by other geometry in the scene. 
-Ambient occlusion is an improvement on basic ambient lighting, but it is not an actual physical phenomenon." title="Click for a definition of ambient occlusion.">ambient occlusion</span>,
+Ambient occlusion is an improvement on basic ambient lighting, but, like ambient light itself,
+it is not an actual physical phenomenon." title="Click for a definition of ambient occlusion.">ambient occlusion</span>,
 the idea that ambient light heading towards a surface can be blocked, or "occluded," by 
 nearby objects. Like ambient light, ambient occlusion is not physically realistic,
 but in practice, it can make lighting look more realistic and objects look more three-dimensional.
@@ -384,7 +392,8 @@ at that point.</p>
 <p>Approximate methods such as these can be added on to ray tracing to increase its
 realism, at the cost of significantly increased complexity and a potentially large 
 amount of extra computing. We begin to see why very realistic images can take so
-long to compute!</p>
+long to compute!  In the <a href="../c8/s2.html">next section</a> we will look at
+a method that attempts to handle global illumination exactly.</p>
 
 
 </div>

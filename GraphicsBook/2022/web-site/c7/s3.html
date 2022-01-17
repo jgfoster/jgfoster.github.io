@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -21,15 +22,15 @@
 <div align="center">
 <b>Subsections</b>
 <hr>
-<small><a href="#webgl3d..1">Texture Transforms with glMatrix</a>
+<small><a href="#webgl3d.3.1">Texture Transforms with glMatrix</a>
 <br>
-<a href="#webgl3d..2">Generated Texture Coordinates</a>
+<a href="#webgl3d.3.2">Generated Texture Coordinates</a>
 <br>
-<a href="#webgl3d..3">Procedural Textures</a>
+<a href="#webgl3d.3.3">Procedural Textures</a>
 <br>
-<a href="#webgl3d..4">Bumpmaps</a>
+<a href="#webgl3d.3.4">Bumpmaps</a>
 <br>
-<a href="#webgl3d..5">Environment Mapping</a>
+<a href="#webgl3d.3.5">Environment Mapping</a>
 <br>
 </small>
 </div>
@@ -50,7 +51,7 @@ at several examples and techniques for using textures.</p>
 
 <div class="subsection">
 <hr class="break">
-<h3 class="subsection_title" id="webgl3d..1">7.3.1&nbsp;&nbsp;Texture Transforms with glMatrix</h3>
+<h3 class="subsection_title" id="webgl3d.3.1">7.3.1&nbsp;&nbsp;Texture Transforms with glMatrix</h3>
 
 <p>In <a href="../c4/s3.html#gl1light.3.4">Subsection&nbsp;4.3.4</a>, we saw how to apply a
 <span class="word" data-term="texture transformation" data-definition="A transformation that is applied to texture coordinates before
@@ -98,7 +99,7 @@ The new matrix is the identity matrix.</li>
 already-existing <span class="classname">mat3</span>.</li>
 
 <li>
-<span class="codedef">mat3.translate(A,B,[dx,dy])</span> &mdash; Multiplies <i>B</i> by a matrix representing
+<span class="codedef">mat3.translate(A,B,[dx,dy])</span> &mdash; Multiplies the matrix <i>B</i> by a matrix representing
 translation by (<i>dx,dy</i>), and sets <i>A</i> to be the resulting matrix. <i>A</i>&nbsp;and <i>B</i>
 must already exist.</li>
 
@@ -149,7 +150,7 @@ v_texCoords = texcoords.xy;</pre>
 
 <div class="subsection">
 <hr class="break">
-<h3 class="subsection_title" id="webgl3d..2">7.3.2&nbsp;&nbsp;Generated Texture Coordinates</h3>
+<h3 class="subsection_title" id="webgl3d.3.2">7.3.2&nbsp;&nbsp;Generated Texture Coordinates</h3>
 
 
 <p>Texture coordinates are typically provided to the shader program as
@@ -287,7 +288,7 @@ is interesting, but probably not very useful.</p>
 
 <div class="subsection">
 <hr class="break">
-<h3 class="subsection_title" id="webgl3d..3">7.3.3&nbsp;&nbsp;Procedural Textures</h3>
+<h3 class="subsection_title" id="webgl3d.3.3">7.3.3&nbsp;&nbsp;Procedural Textures</h3>
 
 
 <p>Up until now, all of our textures have been image textures. With an image
@@ -491,7 +492,7 @@ demo are just a small sample of the possibilities.</p>
 
 <div class="subsection">
 <hr class="break">
-<h3 class="subsection_title" id="webgl3d..4">7.3.4&nbsp;&nbsp;Bumpmaps</h3>
+<h3 class="subsection_title" id="webgl3d.3.4">7.3.4&nbsp;&nbsp;Bumpmaps</h3>
 
 
 <p>So far, the only textures that we have encountered have affected color. Whether they were image
@@ -532,7 +533,7 @@ height map that was applied to the torus:</p>
 <img src="bumpmap.png" width="600" height="142" alt="" class="bordered"></p>
 
 
-<p class="noindent">In the first example, the black dots in the height map produce the appearance of bumps on the torus.
+<p class="noindent">In the first example, the gray dots in the height map produce the appearance of bumps on the torus.
 The darker the color from the map, the greater apparent displacement of the point on the surface. The
 black centers of the dots map to the tops of the bumps.
 For the second example, the dark curves in the height map seem to produce deep grooves in the surface.
@@ -690,11 +691,11 @@ That transformation is done in the last line of code shown above.</p>
 
 <div class="subsection">
 <hr class="break">
-<h3 class="subsection_title" id="webgl3d..5">7.3.5&nbsp;&nbsp;Environment Mapping</h3>
+<h3 class="subsection_title" id="webgl3d.3.5">7.3.5&nbsp;&nbsp;Environment Mapping</h3>
 
 
 <p>
-<a href="../c5/s3.html#threejs.3.5">Subsection&nbsp;5.3.5</a> showed how to use <span class="word" data-term="environment mapping" data-definition="A way of simulating mirror-like reflection from the surface
+<a href="../c5/s3.html#threejs.3.5">Subsection&nbsp;5.3.6</a> showed how to use <span class="word" data-term="environment mapping" data-definition="A way of simulating mirror-like reflection from the surface
 of an object. The environment that is to be reflected from the surface 
 is represented as a cubemap texture. To determine what point in the texture
 is visible at a given point on the object,
@@ -716,7 +717,7 @@ skybox. And if there are other objects in the environment, they won't be part of
 the reflection.</p>
 
 
-<p>The sample program <span class="sourceref"><a href="../source/webgl/skybox-and-env-map.html">webgl/skybox-and-env-map.html</a></span> does environment mapping
+<p>The sample program <span class="sourceref"><a href="../source/webgl/skybox-and-env-map.html">webgl/skybox-and-env-map.html</a></span> implements environment mapping
 in WebGL. The program shows a single fully reflective object inside a skybox. No lighting
 is used in the scene; the colors for both the skybox and the object are taken directly from
 the cubemap texture. The object looks like a perfect mirror. This is not the only way of 
@@ -798,7 +799,7 @@ as a cross-section of the 3D geometry:</p>
 represents the cubemap texture. (You really should think of it as being at infinite distance.)
 <i>V</i>&nbsp;is a vector that points from the object
 towards the viewer. <i>N</i>&nbsp;is the normal vector to the surface. And <i>R</i> is the reflection of
-<i>V</i> through&nbsp;<i>N</i>. <i>R</i>&nbsp;points to the point in the cubemap texture
+<i>V</i> through&nbsp;<i>N</i>. <i>R</i>&nbsp;points to the texel in the cubemap texture
 that is visible to the viewer at the point on the surface; it is the vector that is needed to sample
 the cubemap texture. The picture shows the three vectors at two different points on the surface.
 In GLSL, <i>R</i> can be computed as <i>&minus;reflect</i>(<i>V</i>,&nbsp;<i>N</i>).</p>
@@ -828,8 +829,8 @@ hasn't moved:</p>
 <p class="noindent">If we compute <i>R</i> as before and use it to sample the cubemap texture, we get the
 wrong point in the texture. The viewer should see the point where <i>R</i> intersects
 the skybox, not the point where <i>R</i> intersects the texture. The correct point in the
-texture is picked out by the vector&nbsp;<i>T</i>. <i>T</i>&nbsp;is computed by applying
-the inverse of the viewing transformation to&nbsp;<i>R</i>. <i>R</i>&nbsp;was rotated
+texture is picked out by the vector&nbsp;<i>T</i>. <i>T</i>&nbsp;is computed by 
+transforming <i>R</i> by the inverse of the viewing transformation. <i>R</i>&nbsp;was rotated
 by the viewing transformation; the inverse viewing transformation undoes that transformation,
 putting <i>T</i> into the same coordinate system as the cube map. In this case, since <i>R</i>
 was rotated by 30 degrees, a rotation of &minus;30 degrees is applied to compute&nbsp;<i>T</i>.

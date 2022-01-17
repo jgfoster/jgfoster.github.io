@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -58,6 +59,16 @@ graphics API itself. (See <a href="../a1/s1.html">Section&nbsp;A.1</a> in <a hre
 introduction to Java.)</p>
 
 
+<p>The graphics <span class="word" data-term="API" data-definition="Application Programming Interface. A collection of related classes, functions,
+constants, etc., for performing some task. An API is an &quot;interface&quot; in the sense that it
+can be used without understanding how its functionality is actually implemented." title="Click for a definition of API.">API</span> that is discussed here is part of Swing, an API for
+graphical user interface programming that is included as part of the standard distribution
+of Java. Many Java programs are now written using an alternative API called JavaFX,
+which is not part of the standard distribution. JavaFX is not discussed in this
+textbook. Its graphics API is, in fact, quite similar to the API for 
+HTML canvas graphics, which is discussed in <a href="../c2/s6.html">Section&nbsp;2.6</a>.</p>
+
+
 <p>The original version of Java had a much smaller graphics API. It was
 tightly focused on pixels, and it used only integer coordinates. The API
 had subroutines for stroking and filling a variety of basic shapes,
@@ -114,7 +125,7 @@ more advanced API that we will look at here.</p>
 <p>Java is an object-oriented language. Its API is defined as a large set
 of classes,   The actual drawing operations in the original graphics API
 were mostly contained in the class named <span class="classname">Graphics</span>. 
-In the newer API, drawing operations are methods in a class named <span class="classname">Graphics2D</span>,
+In the newer Swing API, drawing operations are methods in a class named <span class="classname">Graphics2D</span>,
 which is a subclass of <span class="classname">Graphics</span>, so that all the original drawing operations
 are still available. (A class in Java is contained in a collection of classes known as a "package."
 <span class="classname">Graphics</span> and <span class="classname">Graphics2D</span>, for example, are in the
@@ -358,7 +369,7 @@ path counts as 1 if it crosses the ray going in the positive direction and as ne
 crosses in the negative direction." title="Click for a definition of winding number.">winding number</span>, as discussed in <a href="../c2/s2.html#graphics2d.2.2">Subsection&nbsp;2.2.2</a>.
 There are two possible rules for determining whether a point is interior:
 asking whether the winding number of the curve about that point is non-zero, 
-or asking whether it is even. You can set the winding rule used by a <span class="classname">Path2D</span>
+or asking whether it is odd. You can set the winding rule used by a <span class="classname">Path2D</span>
 <i>p</i> with</p>
 
 
@@ -791,7 +802,7 @@ then copied to the screen. One reason to do this is that you can then draw extra
 top of the screen image without changing the official copy. For example, you might draw
 a box around a selected region in the on-screen image. You can do this without damaging the
 official copy in the off-screen canvas. To remove the box from the screen, you just have
-to copy the canvas image onto the screen.</p>
+to copy the off-screen canvas image onto the screen.</p>
 
 
 <p>In Java, an off-screen image can be implemented as an object of type <span class="classname">BufferedImage</span>.
@@ -885,7 +896,8 @@ region of pixels.</p>
 "Smudge" tool. When the user drags with this tool, it's like smearing wet paint. When
 the user first clicks the mouse, the color components from a small square of pixels surrounding
 the mouse position are copied into arrays. As the user moves the mouse, color from the
-arrays is blended with the color of the pixels near the mouse position. Here is a
+arrays is blended into the color of the pixels near the mouse position, while those colors
+are blended into the colors in the arrays. Here is a
 small rectangle that has been "smudged":</p>
 
 
